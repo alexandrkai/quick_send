@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="keywords" content="запрет, рассылка, блокировка, отказ, спам, MSGPRO">
+	<meta name="description" content="Запрет получения сообщений от сервиса MSGPRO.RU — блокировка телефона или email.">
+	<meta property="og:site_name" content="MSGPRO">
+	<meta property="og:url" content="https://msgpro.ru">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="MSGPRO - Запрет рассылки">
+	<meta name='og:image' content='images/assets/ogg.png'>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#0D1A1C">
+	<meta name="msapplication-navbutton-color" content="#0D1A1C">
+	<meta name="apple-mobile-web-app-status-bar-style" content="#0D1A1C">
+	<title>MSGPRO - Запрет рассылки</title>
+	<!-- Favicon -->
+	<link rel="icon" type="image/png" sizes="56x56" href="static/images/fav-icon/icon.png">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" media="all">
+	<!-- Main style sheet -->
+	<link rel="stylesheet" type="text/css" href="static/css/style.min.css" media="all">
+	<!-- responsive style sheet -->
+	<link rel="stylesheet" type="text/css" href="static/css/responsive.css" media="all">
+	<!-- Bootstrap Icons -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+
+<body>
+	<div class="main-page-wrapper">
+		<!-- Preloader -->
+		<div id="preloader">
+			<div id="ctn-preloader" class="ctn-preloader">
+				<div class="icon"><img src="static/images/loader.svg" alt="" class="m-auto d-block"> <span></span></div>
+				<div class="txt-loading">
+					<span data-text-preloader="M" class="letters-loading">M</span>
+					<span data-text-preloader="S" class="letters-loading">S</span>
+					<span data-text-preloader="G" class="letters-loading">G</span>
+					<span data-text-preloader="P" class="letters-loading">P</span>
+					<span data-text-preloader="R" class="letters-loading">R</span>
+					<span data-text-preloader="O" class="letters-loading">O</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Header -->
+		<header class="theme-main-menu menu-style-ten sticky-menu menu-overlay">
+			<div class="inner-content gap-one">
+				<div class="top-header position-relative">
+					<div class="d-flex align-items-center justify-content-between">
+						<div class="logo order-lg-0">
+							<a href="index.html" class="d-flex align-items-center">
+								<img src="static/images/logo/logo_09.svg" alt="">
+							</a>
+						</div>
+						<!-- <div class="order-lg-2 ms-5 d-none d-md-inline-block">
+							<p class="m0 fs-20 font-manrope fw-500">Звонок <a href="#" class="fw-600 text-dark">+7 (495) 123-45-67</a></p>
+						</div> -->
+						<div class="right-widget order-lg-3 ms-auto me-3 me-lg-0">
+							<ul class="d-flex align-items-center style-none">
+								<!-- <li>
+									<div class="dropdown language-dropdown me-4">
+										<button class="dropdown-toggle" type="button" data-bs-toggle="dropdown">
+											<img src="static/images/icon/icon_60.svg" alt="" class="d-inline-block"> RU
+										</button>
+										<ul class="dropdown-menu">
+											<li><a class="dropdown-item" href="#">English</a></li>
+										</ul>
+									</div>
+								</li> -->
+								<li>
+									<div class="dropdown search-dropdown me-sm-4 border-end pe-3">
+										<button class="dropdown-toggle" type="button" data-bs-toggle="dropdown">
+											<img src="static/images/icon/icon_61.svg" alt="">
+										</button>
+										<ul class="dropdown-menu dropdown-menu-end">
+											<li>
+												<form action="#">
+													<input type="text" placeholder="Поиск.....">
+													<button><img src="static/images/icon/icon_61.svg" alt="" class="m-auto"></button>
+												</form>
+											</li>
+										</ul>
+									</div>
+								</li>
+								<!-- <li class="d-none d-sm-inline-block">
+									<a href="#" class="login-btn-one fw-500 d-flex align-items-center tran3s"><img src="static/images/icon/icon_18.svg" alt="" class="me-2"> <span>Мой аккаунт</span></a>
+								</li> -->
+							</ul>
+						</div>
+						<nav class="navbar navbar-expand-lg p0 order-lg-2 ms-lg-auto">
+							<button class="navbar-toggler d-block d-lg-none" type="button" data-bs-toggle="collapse"
+								data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+								aria-label="Toggle navigation">
+								<span></span>
+							</button>
+							<div class="collapse navbar-collapse" id="navbarNav">
+								<ul class="navbar-nav align-items-lg-center">
+									<li class="d-block d-lg-none"><div class="logo"><a href="index.html" class="d-block"><img src="static/images/logo/logo_09.svg" alt=""></a></div></li>
+									<li class="nav-item"><a class="nav-link" href="index.html">Главная</a></li>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+											data-bs-auto-close="outside" aria-expanded="false">Сервисы
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="quick_send.html" class="dropdown-item"><span>Быстрая отправка</span></a></li>
+											<li><a href="prohibit.html" class="dropdown-item"><span>Запрет рассылки</span></a></li>
+											<li><a href="allow.html" class="dropdown-item"><span>Разрешение рассылки</span></a></li>
+										</ul>
+									</li>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+											data-bs-auto-close="outside" aria-expanded="false">Правила сервиса
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="terms.html" class="dropdown-item"><span>Условия использования</span></a></li>
+											<li><a href="privacy.html" class="dropdown-item"><span>Политика конфиденциальности</span></a></li>
+										</ul>
+									</li>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+											data-bs-auto-close="outside" aria-expanded="false">Информация о нас
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="contact-v1.html" class="dropdown-item"><span>О нас</span></a></li>
+											<li><a href="contact-v1.html" class="dropdown-item"><span>Контакт</span></a></li>
+										</ul>
+									</li>
+								</ul>
+							</div>
+						</nav>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<!-- Inner Banner -->
+		<div class="inner-banner-one z-1 position-relative gap-40 mt-120 lg-mt-100">
+			<div class="bg position-relative z-1 pt-120 xl-pt-100 lg-pt-80 pb-130 xl-pb-100 lg-pb-70">
+				<div class="container">
+					<h2>Запрет рассылки</h2>
+					<ul class="style-none d-flex align-items-center">
+						<li><a href="index.html">Главная</a></li>
+						<li>/</li>
+						<li>Запрет рассылки</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- Основной контент -->
+		<div class="service-details mt-150 xl-mt-120 lg-mt-80">
+			<div class="container">
+				<div class="wrapper m-auto" style="max-width: 820px;">
+					<div class="row">
+						<div class="col-12">
+							<div class="card border-0 shadow-sm p-4 p-lg-5">
+								<h4 class="fw-bold mb-3">Запретить получение сообщений</h4>
+								<p class="text-muted mb-4">Укажите телефон или email, на который вы не хотите получать сообщения от нашего сервиса. После подтверждения мы заблокируем возможность отправки на этот контакт.</p>
+
+								<!-- Форма блокировки -->
+								<form id="blockForm" onsubmit="event.preventDefault(); blockContact();">
+
+									<!-- Выбор типа контакта: телефон или email -->
+									<div class="mb-3">
+										<label class="form-label fw-bold">Тип контакта</label>
+										<div>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="contactType" id="typePhone" value="phone" checked onchange="toggleContactInput()">
+												<label class="form-check-label" for="typePhone"><i class="bi bi-phone"></i> Телефон</label>
+											</div>
+											<div class="form-check form-check-inline">
+												<input class="form-check-input" type="radio" name="contactType" id="typeEmail" value="email" onchange="toggleContactInput()">
+												<label class="form-check-label" for="typeEmail"><i class="bi bi-envelope-fill"></i> Email</label>
+											</div>
+										</div>
+									</div>
+
+									<!-- Поле ввода контакта -->
+									<div class="mb-3">
+										<label for="contactInput" class="form-label fw-bold">Контакт для блокировки</label>
+										<input type="text" id="contactInput" class="form-control" placeholder="+7 999 000-00-00" required>
+										<div id="contactHelp" class="form-text">Введите номер телефона в формате +7XXXXXXXXXX или email.</div>
+									</div>
+
+									<!-- Кнопка запроса кода -->
+									<div class="mb-3">
+										<button type="button" class="btn btn-outline-secondary" id="requestCodeBtn" onclick="requestCode()">
+											<span id="reqCodeText">Получить код подтверждения</span>
+											<div id="reqCodeSpinner" class="spinner-border spinner-border-sm d-none"></div>
+										</button>
+										<div id="codeStatus" class="small mt-1"></div>
+									</div>
+
+									<!-- Поле ввода кода -->
+									<div class="mb-4">
+										<label for="codeInput" class="form-label fw-bold">Код из сообщения</label>
+										<div class="input-group">
+											<input type="text" id="codeInput" class="form-control" placeholder="Введите код" maxlength="6">
+											<button class="btn btn-success" type="button" id="verifyCodeBtn" onclick="verifyCode()">
+												<i class="bi bi-check-lg"></i> Подтвердить
+											</button>
+										</div>
+										<div id="verifyStatus" class="small mt-1"></div>
+									</div>
+
+									<!-- Кнопка отправки блокировки (активна только после верификации) -->
+									<button type="submit" class="btn-four w-100 tran3s d-block mt-20" id="blockBtn" disabled>
+										<i class="bi bi-shield-slash"></i> Заблокировать рассылку
+									</button>
+
+									<div id="formMsg" class="alert d-none mt-3 mb-0 p-2" role="alert"></div>
+								</form>
+							</div> <!-- /.card -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<div class="footer-one border-30 bg-one">
+			<div class="position-relative z-1">
+				<div class="container">
+					<div class="position-relative">
+						<div class="row">
+							<div class="col-lg-3">
+								<div class="footer-intro mb-30">
+									<div class="logo">
+										<a href="index.html">
+											<img src="static/images/logo/logo_01.svg" alt="">
+										</a>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-2 col-md-3 col-6">
+								<div class="footer-nav mb-20">
+									<ul class="footer-nav-link style-none">
+										<li><a href="about-us-v1.html">О нас</a></li>
+										<li><a href="contact-v1.html">Контакты</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-lg-2 col-md-3 col-6">
+								<div class="footer-nav mb-20">
+									<ul class="footer-nav-link style-none">
+										<li><a href="quick_send.html">Быстрая отправка</a></li>
+										<li><a href="prohibit.html">Запретить рассылку</a></li>
+										<li><a href="allow.html">Разрешить рассылку</a></li>
+									</ul>
+								</div>
+							</div>
+							<!-- <div class="col-lg-2 col-md-3 col-sm-6">
+								<div class="footer-nav mb-20">
+									<ul class="footer-nav-link style-none">
+										<li><a href="login.html">Войти</a></li>
+									</ul>
+								</div>
+							</div> -->
+							<div class="col-lg-3 col-md-3 col-sm-6">
+								<div class="footer-nav mb-20">
+									<ul class="footer-nav-link style-none">
+										<li><a href="blog-v1.html">Условия использования</a></li>
+										<li><a href="blog-v1.html">Политика конфиденциальности</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<p class="copyright-text m0"><strong class="text-dark">2026.</strong> Все права защищены. MSGPRO.RU — бесплатная отправка СМС и email.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<button class="scroll-top">
+			<i class="bi bi-arrow-up-short"></i>
+		</button>
+
+		<!-- JavaScript -->
+		<script src="static/vendor/jquery.min.js"></script>
+		<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script src="static/vendor/wow/wow.min.js"></script>
+		<script src="static/vendor/slick/slick.min.js"></script>
+		<script src="static/vendor/fancybox/fancybox.umd.js"></script>
+		<script src="static/vendor/jquery.lazy.min.js"></script>
+		<script src="static/vendor/jquery.counterup.min.js"></script>
+		<script src="static/vendor/jquery.waypoints.min.js"></script>
+		<script src="static/vendor/validator.js"></script>
+		<script src="static/js/theme.js"></script>
+
+		<script>
+			// Состояние
+			let isVerified = false;
+			let contactType = 'phone';
+			let contactValue = '';
+
+			// Переключение типа контакта
+			function toggleContactInput() {
+				const type = document.querySelector('input[name="contactType"]:checked');
+				if (type) {
+					contactType = type.value;
+					const input = document.getElementById('contactInput');
+					const help = document.getElementById('contactHelp');
+					if (contactType === 'phone') {
+						input.placeholder = '+7 999 000-00-00';
+						help.textContent = 'Введите номер телефона в формате +7XXXXXXXXXX';
+					} else {
+						input.placeholder = 'user@example.ru';
+						help.textContent = 'Введите адрес электронной почты';
+					}
+					// Сбрасываем состояние верификации
+					resetVerification();
+				}
+			}
+
+			// Запрос кода
+			async function requestCode() {
+				const contact = document.getElementById('contactInput').value.trim();
+				const statusDiv = document.getElementById('codeStatus');
+				const btn = document.getElementById('requestCodeBtn');
+				const btnText = document.getElementById('reqCodeText');
+				const spinner = document.getElementById('reqCodeSpinner');
+
+				if (!contact) {
+					showToast('Введите контакт', 'warning');
+					return;
+				}
+
+				// Простая валидация
+				if (contactType === 'phone' && !/^\+7\d{10}$/.test(contact.replace(/\s/g, ''))) {
+					showToast('Введите номер в формате +7XXXXXXXXXX', 'danger');
+					return;
+				}
+				if (contactType === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) {
+					showToast('Введите корректный email', 'danger');
+					return;
+				}
+
+				btnText.textContent = 'Отправка...';
+				spinner.classList.remove('d-none');
+				btn.disabled = true;
+				statusDiv.innerHTML = '';
+
+				try {
+					// Заглушка — здесь будет запрос к бэкенду /api/block/request-code
+					// Пока эмулируем успех
+					const response = await fakeRequest(contact);
+					if (response.success) {
+						statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle"></i> Код отправлен на ${contact}</span>`;
+						showToast('Код отправлен', 'success');
+						contactValue = contact;
+					} else {
+						statusDiv.innerHTML = `<span class="text-danger">${response.error || 'Ошибка отправки'}</span>`;
+						showToast('Ошибка отправки', 'danger');
+					}
+				} catch (e) {
+					statusDiv.innerHTML = `<span class="text-danger">Ошибка соединения</span>`;
+					showToast('Ошибка сети', 'danger');
+				} finally {
+					btnText.textContent = 'Получить код подтверждения';
+					spinner.classList.add('d-none');
+					btn.disabled = false;
+				}
+			}
+
+			// Верификация кода
+			async function verifyCode() {
+				const code = document.getElementById('codeInput').value.trim();
+				const statusDiv = document.getElementById('verifyStatus');
+				const verifyBtn = document.getElementById('verifyCodeBtn');
+
+				if (!code || code.length < 4) {
+					showToast('Введите код', 'warning');
+					return;
+				}
+
+				verifyBtn.disabled = true;
+				statusDiv.innerHTML = 'Проверка...';
+
+				try {
+					// Заглушка — проверка кода. В реальности будет /api/block/verify-code
+					const response = await fakeVerify(code);
+					if (response.success) {
+						isVerified = true;
+						statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Код подтверждён</span>`;
+						document.getElementById('blockBtn').disabled = false;
+						showToast('Код верный', 'success');
+					} else {
+						statusDiv.innerHTML = `<span class="text-danger">${response.error || 'Неверный код'}</span>`;
+						showToast('Неверный код', 'danger');
+					}
+				} catch (e) {
+					statusDiv.innerHTML = `<span class="text-danger">Ошибка проверки</span>`;
+					showToast('Ошибка', 'danger');
+				} finally {
+					verifyBtn.disabled = false;
+				}
+			}
+
+			// Отправка блокировки
+			async function blockContact() {
+				const msgDiv = document.getElementById('formMsg');
+				const btn = document.getElementById('blockBtn');
+
+				if (!isVerified) {
+					showMsg('Сначала подтвердите код', 'danger');
+					return;
+				}
+
+				const payload = {
+					contact_type: contactType,
+					contact: contactValue,
+					code: document.getElementById('codeInput').value.trim()
+				};
+
+				btn.disabled = true;
+				btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Отправка...';
+				msgDiv.classList.add('d-none');
+
+				try {
+					// Заглушка — реальный запрос к /api/block/create
+					const response = await fakeBlock(payload);
+					if (response.success) {
+						showMsg('Контакт успешно заблокирован. Сообщения на него больше не будут доставляться.', 'success');
+						// Сброс формы
+						resetVerification();
+						document.getElementById('contactInput').value = '';
+						document.getElementById('codeInput').value = '';
+						document.getElementById('blockBtn').disabled = true;
+					} else {
+						throw new Error(response.error || 'Ошибка блокировки');
+					}
+				} catch (e) {
+					showMsg(e.message, 'danger');
+				} finally {
+					btn.disabled = false;
+					btn.innerHTML = '<i class="bi bi-shield-slash"></i> Заблокировать рассылку';
+				}
+			}
+
+			// --- Заглушки (заменить на реальные fetch) ---
+			function fakeRequest(contact) {
+				return new Promise((resolve) => {
+					setTimeout(() => resolve({ success: true }), 1000);
+				});
+			}
+
+			function fakeVerify(code) {
+				return new Promise((resolve) => {
+					setTimeout(() => {
+						if (code === '123456' || code === '000000') {
+							resolve({ success: true });
+						} else {
+							resolve({ success: false, error: 'Неверный код' });
+						}
+					}, 800);
+				});
+			}
+
+			function fakeBlock(payload) {
+				return new Promise((resolve) => {
+					setTimeout(() => resolve({ success: true }), 1200);
+				});
+			}
+
+			// --- Вспомогательные ---
+			function resetVerification() {
+				isVerified = false;
+				document.getElementById('blockBtn').disabled = true;
+				document.getElementById('verifyStatus').innerHTML = '';
+				document.getElementById('codeStatus').innerHTML = '';
+				document.getElementById('codeInput').value = '';
+				document.getElementById('formMsg').classList.add('d-none');
+			}
+
+			function showMsg(text, type) {
+				const msgDiv = document.getElementById('formMsg');
+				msgDiv.textContent = text;
+				msgDiv.className = `alert alert-${type} mt-3 mb-0 p-2`;
+				msgDiv.classList.remove('d-none');
+			}
+
+			function showToast(message, type) {
+				if (typeof window.showToast === 'function') {
+					window.showToast(message, type);
+				} else {
+					alert(message);
+				}
+			}
+
+			// Инициализация
+			toggleContactInput();
+		</script>
+	</div>
+</body>
+
+</html>

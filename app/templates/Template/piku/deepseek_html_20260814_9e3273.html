@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="keywords" content="рассылка, смс, email, бесплатно, сообщения, сервис, уведомления">
+	<meta name="description" content="Бесплатный сервис для отправки СМС и email. Просто, быстро, с ограничением 10 СМС в час. Только для номеров РФ.">
+    <meta property="og:site_name" content="MSGPRO">
+    <meta property="og:url" content="https://msgpro.ru">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MSGPRO - Бесплатная отправка СМС и email">
+	<meta name='og:image' content='images/assets/ogg.png'>
+	<!-- For IE -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<!-- For Resposive Device -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- For Window Tab Color -->
+	<!-- Chrome, Firefox OS and Opera -->
+	<meta name="theme-color" content="#0D1A1C">
+	<!-- Windows Phone -->
+	<meta name="msapplication-navbutton-color" content="#0D1A1C">
+	<!-- iOS Safari -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="#0D1A1C">
+	<title>MSGPRO - Бесплатная отправка СМС и email</title>
+	<!-- Favicon -->
+	<link rel="icon" type="image/png" sizes="56x56" href="static/images/fav-icon/icon.png">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" media="all">
+	<!-- Main style sheet -->
+	<link rel="stylesheet" type="text/css" href="static/css/style.min.css" media="all">
+	<!-- responsive style sheet -->
+	<link rel="stylesheet" type="text/css" href="static/css/responsive.css" media="all">
+
+	<!-- Fix Internet Explorer ______________________________________-->
+	<!--[if lt IE 9]>
+			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+			<script src="static/vendor/html5shiv.js"></script>
+			<script src="static/vendor/respond.js"></script>
+		<![endif]-->
+</head>
+
+<body>
+	<div class="main-page-wrapper dark-bg p-30">
+		<!-- ===================================================
+			Loading Transition
+		==================================================== -->
+		<div id="preloader">
+			<div id="ctn-preloader" class="ctn-preloader">
+				<div class="icon"><img src="static/images/loader.svg" alt="" class="m-auto d-block"> <span></span></div>
+				<div class="txt-loading">
+					<span data-text-preloader="M" class="letters-loading">
+						M
+					</span>
+					<span data-text-preloader="S" class="letters-loading">
+						S
+					</span>
+					<span data-text-preloader="G" class="letters-loading">
+						G
+					</span>
+					<span data-text-preloader="P" class="letters-loading">
+						P
+					</span>
+					<span data-text-preloader="R" class="letters-loading">
+						R
+					</span>
+					<span data-text-preloader="O" class="letters-loading">
+						O
+					</span>
+				</div>
+			</div>
+		</div>
+
+
+		
+		<!-- 
+		=============================================
+			Theme Main Menu
+		============================================== 
+		-->
+		<header class="theme-main-menu menu-style-one">
+			<div class="inner-content bg-wrapper bg-one border-20">
+				<div class="top-header position-relative">
+					<div class="d-flex align-items-center justify-content-between">
+						<div class="logo order-lg-0">
+							<a href="index.html" class="d-flex align-items-center">
+								<img src="static/images/logo/logo_01.svg" alt="">
+							</a>
+						</div>
+						<!-- logo -->
+						<div class="right-widget ms-auto ms-lg-0 me-3 me-lg-0 order-lg-3">
+							<ul class="d-flex align-items-center style-none">
+								<li class="d-none d-md-inline-block ms-3">
+                                    <a href="login.html" class="btn-one">Войти</a>
+                                </li>
+							</ul>
+						</div>
+						<nav class="navbar navbar-expand-lg p0 order-lg-2">
+							<button class="navbar-toggler d-block d-lg-none" type="button" data-bs-toggle="collapse"
+								data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+								aria-label="Toggle navigation">
+								<span></span>
+							</button>
+							<div class="collapse navbar-collapse" id="navbarNav">
+								<ul class="navbar-nav align-items-lg-center">
+									<li class="d-block d-lg-none"><div class="logo"><a href="index.html" class="d-block"><img src="static/images/logo/logo_01.svg" alt=""></a></div></li>
+									<li class="nav-item dropdown mega-dropdown">
+										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+											data-bs-auto-close="outside" aria-expanded="false">Главная
+										</a>
+										<ul class="dropdown-menu">
+											<li class="pe-3 ps-3">
+												<div class="row gx-3">
+													<div class="col-lg-3">
+														<a href="index.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home01.jpg" alt="" class="w-100"></div>
+															<span>СМС-рассылка</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-2.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home02.jpg" alt="" class="w-100"></div>
+															<span>Email-рассылка</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-3.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home03.jpg" alt="" class="w-100"></div>
+															<span>Статистика</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-4.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home04.jpg" alt="" class="w-100"></div>
+															<span>Контакты</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-5.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home05.jpg" alt="" class="w-100"></div>
+															<span>Шаблоны</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-6.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home06.jpg" alt="" class="w-100"></div>
+															<span>Отчёты</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-7.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home07.jpg" alt="" class="w-100"></div>
+															<span>Поддержка</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-8.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home08.jpg" alt="" class="w-100"></div>
+															<span>FAQ</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-9.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home09.jpg" alt="" class="w-100"></div>
+															<span>О сервисе</span>
+														</a>
+													</div>
+													<div class="col-lg-3">
+														<a href="index-10.html" class="home-item w-100">
+															<div class="img-item"><img src="static/images/menu/home10.jpg" alt="" class="w-100"></div>
+															<span>Блог</span>
+														</a>
+													</div>
+												</div>
+											</li>
+										</ul>
+									</li>
+									<!-- <li class="nav-item dropdown mega-dropdown-sm">
+							        	<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">Pages
+										</a>
+						                <ul class="dropdown-menu">
+							                <li class="row gx-1">
+												<div class="col-lg-4">
+													<div class="menu-column">
+														<h6 class="mega-menu-title">Essential</h6>
+														<ul class="style-none mega-dropdown-list">
+															<li><a href="about-us-v1.html" class="dropdown-item"><span>О нас</span></a></li>
+															<li><a href="about-us-v2.html" class="dropdown-item"><span>About Us-2</span></a></li>
+															<li><a href="about-us-v3.html" class="dropdown-item"><span>About Us-3</span></a></li>
+															<li><a href="team-v1.html" class="dropdown-item"><span>Team-1</span></a></li>
+															<li><a href="team-v2.html" class="dropdown-item"><span>Team-2</span></a></li>
+															
+														</ul>
+													</div>
+												</div>
+												<div class="col-lg-4">
+													<div class="menu-column">
+														<h6 class="mega-menu-title">Features</h6>
+														<ul class="style-none mega-dropdown-list">
+															<li><a href="service-v1.html" class="dropdown-item"><span>Service-1</span></a></li>
+															<li><a href="service-v2.html" class="dropdown-item"><span>Service-2</span></a></li>
+															<li><a href="service-v3.html" class="dropdown-item"><span>Service-3</span></a></li>
+															<li><a href="service-details.html" class="dropdown-item"><span>Service Details</span></a></li>
+															<li><a href="pricing-v1.html" class="dropdown-item"><span>Pricing-1</span></a></li>
+															<li><a href="pricing-v2.html" class="dropdown-item"><span>Pricing-2</span></a></li>
+															
+														</ul>
+													</div>
+												</div>
+												<div class="col-lg-4">
+													<div class="menu-column">
+														<h6 class="mega-menu-title">Others</h6>
+														<ul class="style-none mega-dropdown-list">
+															<li><a href="faq-v1.html" class="dropdown-item"><span>FAQ-1</span></a></li>
+															<li><a href="faq-v2.html" class="dropdown-item"><span>FAQ-2</span></a></li>
+															<li><a href="login.html" class="dropdown-item"><span>Войти</span></a></li>
+															<li><a href="signup.html" class="dropdown-item"><span>Регистрация</span></a></li>
+															<li><a href="404.html" class="dropdown-item"><span>404 Error</span></a></li>
+														</ul>
+													</div>
+												</div>
+											</li>
+						                </ul>
+						            </li> -->
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+											data-bs-auto-close="outside" aria-expanded="false">Сервисы
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="project-v1.html" class="dropdown-item"><span>Отправить СМС</span></a></li>
+											<li><a href="project-v2.html" class="dropdown-item"><span>Отправить Email</span></a></li>
+											<!-- <li><a href="project-v3.html" class="dropdown-item"><span>Project-3</span></a></li>
+											<li><a href="project-v4.html" class="dropdown-item"><span>Project-4</span></a></li>
+											<li><a href="project-v5.html" class="dropdown-item"><span>Project-5</span></a></li>
+											<li><a href="project-v6.html" class="dropdown-item"><span>Project-6</span></a></li>
+											<li><a href="project-details.html" class="dropdown-item"><span>Project Details</span></a></li> -->
+										</ul>
+									</li>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+											data-bs-auto-close="outside" aria-expanded="false">Соглашение
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="blog-v1.html" class="dropdown-item"><span>Условия использования</span></a></li>
+											<li><a href="blog-v2.html" class="dropdown-item"><span>Политика конфиденциальности</span></a></li>
+											<li><a href="blog-v3.html" class="dropdown-item"><span>Запрещённый контент</span></a></li>
+											<!-- <li><a href="blog-details.html" class="dropdown-item"><span>Blog Details</span></a></li> -->
+										</ul>
+									</li>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+											data-bs-auto-close="outside" aria-expanded="false">Связаться с нами
+										</a>
+										<ul class="dropdown-menu">
+											<li><a href="contact-v1.html" class="dropdown-item"><span>Контакт</span></a></li>
+											<!-- <li><a href="contact-v2.html" class="dropdown-item"><span>Contact Us-2</span></a></li> -->
+										</ul>
+									</li>
+									<li class="d-md-none ps-3 pe-3 mt-20">
+										<a href="login.html" class="btn-one w-100">Войти</a>
+									</li>
+								</ul>
+							</div>
+						</nav>
+					</div>
+				</div> <!--/.top-header-->
+			</div> <!-- /.inner-content -->
+		</header> 
+		<!-- /.theme-main-menu -->
+
+
+
+		<!-- 
+		=============================================
+			Hero Banner
+		============================================== 
+		-->
+		<div class="hero-banner-one bg-one border-30 z-1 pt-120 lg-pt-80 pb-100 lg-pb-70 mt-30 lg-mt-20 position-relative">
+			<div class="container position-relative">
+				<div class="row">
+					<div class="col-lg-7 col-md-7">
+						<p class="fs-24 fw-500 text-dark mb-10 wow fadeInUp">Начни сейчас!</p>
+						<h1 class="hero-heading wow fadeInUp">Отправляйте СМС и email <span class="d-inline-block position-relative">быстро <img src="static/images/shape/shape_01.svg" alt="" class="d-inline-block"></span> и бесплатно</h1>
+						<div class="row">
+							<div class="col-xxl-8 col-lg-10">
+								<p class="fs-24 text-dark pt-25 pb-30 lg-pb-20 xs-pb-10 wow fadeInUp" data-wow-delay="0.1s">Сервис для отправки СМС на номера РФ (до 10 в час) и email на любые адреса. Всё бесплатно и без скрытых условий.</p>
+							</div>
+						</div>
+						<ul class="style-none d-flex align-items-center flex-wrap">
+							<li class="mt-10"><a href="#" class="btn-one me-4">Начать отправку</a></li>
+							<li class="mt-10"><a href="#" class="btn-two xl">Попробовать бесплатно</a></li>
+						</ul>
+						<p class="fs-22 pt-100 md-pt-50 md-pb-20"><span class="fw-500 text-dark text-decoration-underline">Уже 27 000+</span> пользователей доверяют нам </p>
+					</div>
+				</div>
+			</div>
+			<div class="client-logo-wrapper">
+				<div class="container">
+					<div class="partner-logo-one">
+						<div class="item"><img src="static/images/logo/p_logo_01.png" alt="" class="m-auto"></div>
+						<div class="item"><img src="static/images/logo/p_logo_02.png" alt="" class="m-auto"></div>
+						<div class="item"><img src="static/images/logo/p_logo_03.png" alt="" class="m-auto"></div>
+						<div class="item"><img src="static/images/logo/p_logo_04.png" alt="" class="m-auto"></div>
+						<div class="item"><img src="static/images/logo/p_logo_05.png" alt="" class="m-auto"></div>
+						<div class="item"><img src="static/images/logo/p_logo_06.png" alt="" class="m-auto"></div>
+						<div class="item"><img src="static/images/logo/p_logo_04.png" alt="" class="m-auto"></div>
+					</div>
+				</div>
+			</div>
+			<img src="static/images/assets/ils_01.png" alt="" class="shapes illustration">
+		</div>
+		<!-- /.hero-banner-one -->
+
+
+		
+
+
+		<!--
+		=====================================================
+			BLock Feature One
+		=====================================================
+		-->
+		<div class="block-feature-one border-30 bg-three mt-30 lg-mt-20 pt-150 lg-pt-80 pb-200 lg-pb-140">
+			<div class="container">
+				<div class="row">
+					<div class="col-xxl-7 col-lg-6 order-lg-last">
+						<div class="ps-lg-5 ms-xxl-4 md-mb-60">
+							<div class="title-one">
+								<h2>СМС и email — два основных канала</h2>
+							</div>
+							<p class="fs-28 text-dark fw-500 mt-40 md-mt-20">Мы сфокусировались на самом надёжном: отправляйте СМС на номера России (не более 10 в час) и письма на любые email-адреса. Без лишних сложностей.</p>
+							<div class="counter-wrapper mt-25 mb-70 lg-mb-50">
+								<div class="row">
+									<div class="col-7">
+										<div class="counter-block-one mt-20">
+											<div class="main-count fw-500 color-dark"><span class="counter">98</span>%</div>
+											<span class="fs-22">Доставляемость СМС</span>
+										</div>
+										<!-- /.counter-block-one -->
+									</div>
+									<div class="col-5">
+										<div class="counter-block-one mt-20">
+											<div class="main-count fw-500 color-dark"><span class="counter">100</span>%</div>
+											<span class="fs-22">Email без ограничений</span>
+										</div>
+										<!-- /.counter-block-one -->
+									</div>
+								</div>
+							</div>
+							<a href="#" class="btn-two xl">Начать отправку</a>
+						</div>
+					</div>
+					<div class="col-xxl-5 col-lg-6 col-md-7 m-auto text-end order-lg-first">
+						<div class="img-holder z-1 d-inline-block position-relative">
+							<img src="static/images/assets/card_01.png" alt="">
+							<img src="static/images/assets/card_02.png" alt="" class="card_01 wow fadeInLeft" data-wow-delay="0.1s">
+							<img src="static/images/assets/card_03.png" alt="" class="card_02 wow fadeInLeft" data-wow-delay="0.2s">
+							<img src="static/images/shape/shape_02.svg" alt="" class="shapes shape_01 wow fadeInLeft" data-wow-delay="0.3s">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /.block-feature-one -->
+
+
+		<!--
+		=====================================================
+			BLock Feature Two
+		=====================================================
+		-->
+		<div class="block-feature-two mb-30 lg-mb-20">
+			<div class="row gx-xl-4">
+				<div class="col-lg-4 d-flex wow fadeInUp mt-30 lg-mt-20">
+					<div class="card-style-one text-center border-30 bg-white w-100">
+						<div class="icon rounded-circle d-flex align-items-center justify-content-center m-auto"><img src="static/images/icon/icon_01.svg" alt=""></div>
+						<h3>СМС и Email <br> за секунды</h3>
+						<p class="fs-24 fw-500 text-dark">Отправляйте сообщения без задержек. СМС доставляются за 5–10 секунд, письма — почти мгновенно.</p>
+					</div>
+					<!-- /.card-style-one -->
+				</div>
+				<div class="col-lg-4 d-flex wow fadeInUp mt-30 lg-mt-20" data-wow-delay="0.1s">
+					<div class="card-style-one text-center border-30 bg-white w-100">
+						<div class="icon rounded-circle d-flex align-items-center justify-content-center m-auto"><img src="static/images/icon/icon_02.svg" alt=""></div>
+						<h3>Простой <br> интерфейс</h3>
+						<p class="fs-24 fw-500 text-dark">Интуитивно понятная форма: введите номер или email, текст — и отправляйте. Без регистрации можно попробовать.</p>
+					</div>
+					<!-- /.card-style-one -->
+				</div>
+				<div class="col-lg-4 d-flex wow fadeInUp mt-30 lg-mt-20" data-wow-delay="0.2s">
+					<div class="card-style-one text-center border-30 bg-white w-100">
+						<div class="icon rounded-circle d-flex align-items-center justify-content-center m-auto"><img src="static/images/icon/icon_03.svg" alt=""></div>
+						<h3>Бесплатно и <br> честно</h3>
+						<p class="fs-24 fw-500 text-dark">Никаких платных тарифов. СМС — до 10 в час, email — без лимитов. Идеально для малого бизнеса и личных нужд.</p>
+					</div>
+					<!-- /.card-style-one -->
+				</div>
+			</div>
+		</div>
+		<!-- /.block-feature-two -->
+
+
+		<!--
+		=====================================================
+			BLock Feature Three
+		=====================================================
+		-->
+		<div class="block-feature-three border-30 bg-two pt-130 lg-pt-80 md-pt-30 pb-150 lg-pb-80 mb-30 lg-mb-20">
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-lg-6 wow fadeInLeft">
+						<div class="title-one mb-30 mt-50">
+							<h2>Отправка СМС <span class="d-inline-block position-relative">только по России <img src="static/images/shape/shape_03.svg" alt="" class="d-inline-block"></span> <br> с лимитом 10 в час</h2>
+						</div>
+						<p class="fs-24 fw-500 text-dark">Мы поддерживаем операторов РФ. Для соблюдения качества и борьбы со спамом установлено ограничение — не более 10 СМС в час с одного аккаунта. Для email ограничений нет.</p>
+					</div>
+					<div class="col-lg-6 col-md-8 m-auto text-end wow fadeInRight">
+						<div class="img-holder-one position-relative d-inline-block z-1 md-mt-40">
+							<img src="static/images/assets/card_04.png" alt="">
+							<img src="static/images/shape/shape_04.svg" alt="" class="shapes shape_01">
+						</div>
+					</div>
+				</div>
+
+				<div class="row align-items-center mt-100 md-mt-30">
+					<div class="col-lg-6 wow fadeInRight order-lg-last">
+						<div class="ps-xl-5">
+							<div class="title-one mb-30 mt-50">
+								<h2>Управляйте <span class="d-inline-block position-relative">контактами <img src="static/images/shape/shape_03.svg" alt="" class="d-inline-block"></span></h2>
+							</div>
+							<p class="fs-24 fw-500 text-dark">Сохраняйте номера и адреса в личной книге, группируйте их для быстрой отправки. Вся история сообщений хранится в вашем аккаунте.</p>
+						</div>
+					</div>
+					<div class="col-lg-6 col-md-8 m-auto wow fadeInLeft order-lg-first">
+						<div class="img-holder-two position-relative d-inline-block z-1 md-mt-20">
+							<img src="static/images/assets/card_05.png" alt="">
+							<img src="static/images/shape/shape_05.svg" alt="" class="shapes shape_01">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /.block-feature-three -->
+
+
+
+		<!--
+		=====================================================
+			Feedback Section One
+		=====================================================
+		-->
+		<div class="feedback-section-one mb-30 lg-mb-20">
+			<div class="feedback-slider-one">
+				<div class="item">
+					<div class="feedback-block-one bg-white border-30">
+						<div class="d-flex align-items-center justify-content-between">
+							<img src="static/images/logo/p_logo_07.png" alt="">
+							<div class="icon rounded-circle d-flex align-items-center justify-content-center"><img src="static/images/icon/icon_04.svg" alt=""></div>
+						</div>
+						<blockquote>
+							«Отличный сервис! Отправляю СМС клиентам, всё доходит мгновенно. Лимит 10 в час для меня не проблема, <span style="color: #FD05F3;">главное — бесплатно</span>.»
+						</blockquote>
+						<div class="d-sm-flex align-items-center justify-content-between">
+							<p class="m0"><span class="fw-500 text-dark fs-20">Олег Иванов,</span> владелец небольшого магазина</p>
+							<ul class="style-none d-flex rating">
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="item">
+					<div class="feedback-block-one bg-white border-30">
+						<div class="d-flex align-items-center justify-content-between">
+							<img src="static/images/logo/p_logo_08.png" alt="">
+							<div class="icon rounded-circle d-flex align-items-center justify-content-center"><img src="static/images/icon/icon_04.svg" alt=""></div>
+						</div>
+						<blockquote>
+							«Использую для рассылки писем партнёрам. <span style="color: #5AD95F;">Email уходит моментально</span>, нет спам-фильтров. Очень удобно, что можно вести список контактов.»
+						</blockquote>
+						<div class="d-sm-flex align-items-center justify-content-between">
+							<p class="m0"><span class="fw-500 text-dark fs-20">Мария Соколова,</span> менеджер по коммуникациям</p>
+							<ul class="style-none d-flex rating">
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="item">
+					<div class="feedback-block-one bg-white border-30">
+						<div class="d-flex align-items-center justify-content-between">
+							<img src="static/images/logo/p_logo_07.png" alt="">
+							<div class="icon rounded-circle d-flex align-items-center justify-content-center"><img src="static/images/icon/icon_04.svg" alt=""></div>
+						</div>
+						<blockquote>
+							«Искал простой способ оповещать клиентов о заказах. СМС-лимит 10 в час — это разумно, <span style="color: #FD05F3;">защищает от злоупотреблений</span>. Рекомендую!»
+						</blockquote>
+						<div class="d-sm-flex align-items-center justify-content-between">
+							<p class="m0"><span class="fw-500 text-dark fs-20">Андрей Петров,</span> предприниматель</p>
+							<ul class="style-none d-flex rating">
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="item">
+					<div class="feedback-block-one bg-white border-30">
+						<div class="d-flex align-items-center justify-content-between">
+							<img src="static/images/logo/p_logo_08.png" alt="">
+							<div class="icon rounded-circle d-flex align-items-center justify-content-center"><img src="static/images/icon/icon_04.svg" alt=""></div>
+						</div>
+						<blockquote>
+							«Удобно, что можно отправлять и СМС, и email из одного кабинета. <span style="color: #5AD95F;">Интерфейс минималистичный</span>, ничего лишнего. Спасибо разработчикам!»
+						</blockquote>
+						<div class="d-sm-flex align-items-center justify-content-between">
+							<p class="m0"><span class="fw-500 text-dark fs-20">Екатерина Дмитриева,</span> фрилансер</p>
+							<ul class="style-none d-flex rating">
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+								<li><i class="bi bi-star-fill"></i></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /.feedback-section-one -->
+
+
+
+		<!--
+		=====================================================
+			FAQ Section One
+		=====================================================
+		-->
+		<div class="faq-section-one bg-four position-relative z-1 pt-150 lg-pt-80 pb-120 lg-pb-80 border-30 mb-30 lg-mb-20">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-9 m-auto">
+						<div class="title-one text-center mb-80 xl-mb-60 md-mb-40">
+							<h2>Часто задаваемые вопросы</h2>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-lg-6">
+						<div class="accordion accordion-style-one" id="accordionOne">
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+										Что такое MSGPRO.RU?
+									</button>
+								  </h2>
+								  <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionOne">
+									<div class="accordion-body">
+										<p class="fs-22">Это бесплатный сервис для отправки СМС (только на номера РФ, до 10 в час) и email (без ограничений).</p>
+									</div>
+								  </div>
+							</div>
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+										Почему ограничение 10 СМС в час?
+									</button>
+								</h2>
+								<div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionOne">
+									<div class="accordion-body">
+										<p class="fs-22">Это сделано для защиты от спама и равномерной нагрузки. Для большинства пользователей этого достаточно. Если нужно больше — напишите нам, возможно, мы увеличим лимит.</p>
+									</div>
+								</div>
+							</div>
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+										Сколько стоят услуги на MSGPRO.RU?
+									</button>
+								</h2>
+								<div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionOne">
+									<div class="accordion-body">
+										<p class="fs-22">Абсолютно бесплатно. Никаких скрытых платежей.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div class="accordion accordion-style-one" id="accordionTwo">
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAOne" aria-expanded="false" aria-controls="collapseAOne">
+										Можно ли отправлять СМС на номера других стран?
+									</button>
+								  </h2>
+								  <div id="collapseAOne" class="accordion-collapse collapse" data-bs-parent="#accordionTwo">
+									<div class="accordion-body">
+										<p class="fs-22">Нет, на данный момент мы поддерживаем только номера российских операторов.</p>
+									</div>
+								  </div>
+							</div>
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseATwo" aria-expanded="false" aria-controls="collapseATwo">
+										Есть ли ограничения по email?
+									</button>
+								</h2>
+								<div id="collapseATwo" class="accordion-collapse collapse" data-bs-parent="#accordionTwo">
+									<div class="accordion-body">
+										<p class="fs-22">Нет, вы можете отправлять сколько угодно писем на любые адреса.</p>
+									</div>
+								</div>
+							</div>
+							<div class="accordion-item">
+								<h2 class="accordion-header">
+									<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAThree" aria-expanded="true" aria-controls="collapseAThree">
+										Нужно ли регистрироваться для отправки?
+									</button>
+								</h2>
+								<div id="collapseAThree" class="accordion-collapse collapse" data-bs-parent="#accordionTwo">
+									<div class="accordion-body">
+										<p class="fs-22">Для тестовой отправки регистрация не нужна, но для сохранения контактов и истории лучше создать аккаунт (бесплатно).</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="text-center mt-60 lg-mt-40">
+					<h4 class="mb-35">Не нашли ответ на свой вопрос?</h4>
+					<a href="contact-v1.html" class="btn-two xl">Напишите нам</a>
+				</div>
+			</div>
+			<img src="static/images/shape/shape_06.svg" alt="" class="shapes shape_01">
+			<img src="static/images/shape/shape_07.svg" alt="" class="shapes shape_02">
+		</div>
+
+
+		<!--
+		=====================================================
+			Fancy Banner One
+		=====================================================
+		-->
+		<div class="fancy-banner-one position-relative z-1 bg-one border-30 text-center pt-130 lg-pt-80 pb-130 lg-pb-80 mb-30 lg-mb-20">
+			<div class="container">
+				<div class="row">
+					<div class="col-xxl-8 col-lg-7 m-auto">
+						<div class="title-one mb-35 lg-mb-30">
+							<h2>Начните отправлять СМС и email уже сегодня</h2>
+						</div>
+					</div>
+				</div>
+				<p class="fs-28 mb-45 lg-mb-30">Просто зарегистрируйтесь и попробуйте — это бесплатно. СМС доставляются за секунды, письма — мгновенно.</p>
+				<a href="signup.html" class="btn-two xl">Регистрация</a>
+			</div>
+			<img src="static/images//assets/ils_02.png" alt="" class="shapes shape_01">
+			<img src="static/images//assets/ils_03.png" alt="" class="shapes shape_02">
+		</div>
+
+
+
+		<!--
+		=====================================================
+			Footer One
+		=====================================================
+		-->
+		<div class="footer-one border-30 bg-one">
+			<div class="position-relative z-1">
+				<div class="container">
+					<div class="email-banner position-relative z-1 bg-three border-30">
+						<div class="row align-items-center">
+							<div class="col-lg-6">
+								<h3>Получите доступ к сервису прямо сейчас</h3>
+							</div>
+							<div class="col-lg-6">
+								<form action="#" class="position-relative">
+									<input type="phone" placeholder="+7 (___) ___-__-__">
+									<button class="tran3s"><img src="static/images/icon/icon_05.svg" alt="" class="m-auto"></button>
+								</form>
+							</div>
+						</div>
+					</div>
+					<!-- /.email-banner -->
+					<div class="position-relative">
+						<div class="row">
+							<div class="col-lg-3">
+								<div class="footer-intro mb-30">
+									<div class="logo">
+										<a href="index.html">
+											<img src="static/images/logo/logo_01.svg" alt="">
+										</a>
+									</div> 
+									<!-- logo -->
+								</div>
+							</div>
+							<div class="col-lg-2 col-md-3 col-6">
+								<div class="footer-nav mb-20">
+									<ul class="footer-nav-link style-none">
+										<li><a href="about-us-v1.html">О нас </a></li>
+										<!-- <li><a href="project-v1.html">Work Gallery</a></li>
+										<li><a href="pricing-v1.html">Pricing</a></li>
+										<li><a href="blog-v1.html">Blog</a></li> -->
+										<li><a href="contact-v1.html">Контакты</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-lg-2 col-md-3 col-6">
+								<div class="footer-nav mb-20">
+									<ul class="footer-nav-link style-none">
+										<!-- <li><a href="faq-v1.html">Faq’s</a></li> -->
+										<li><a href="service-v1.html">Отправить СМС</a></li>
+										<li><a href="service-v2.html">Отправить Email</a></li>
+										
+									</ul>
+								</div>
+							</div>
+							<div class="col-lg-2 col-md-3 col-sm-6">
+								<div class="footer-nav mb-20">
+									<ul class="footer-nav-link style-none">
+										<!-- <li><a href="project-v2.html">Portfolio</a></li>
+										<li><a href="faq-v1.html">Cookies Policy</a></li>
+										<li><a href="blog-v2.html">Reports</a></li>
+										<li><a href="team-v1.html">Team</a></li>
+										<li><a href="blog-v3.html">Article</a></li> -->
+										<li><a href="login.html">Войти</a></li>
+									</ul>
+								</div>
+							</div>
+							<div class="col-lg-3 col-md-3 col-sm-6">
+								<div class="footer-contact mb-20">
+									<p class="fw-500 fs-20 text-dark mb-30 md-mb-20">г. Москва, ул. Тверская, д. 7</p>
+									<a href="#" class="tel fw-500 fs-24 tran3s mb-40">+7 (495) 123-45-67</a>
+									<!-- <ul class="style-none d-flex align-items-center social-icon">
+										<li><a href="#"><i class="fa-brands fa-facebook"></i></a></li>
+										<li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
+										<li><a href="#"><i class="fa-brands fa-instagram"></i></a></li>
+									</ul> -->
+								</div>
+							</div>
+						</div>
+						<p class="copyright-text m0"><strong class="text-dark">2026.</strong> Все права защищены. MSGPRO.RU — бесплатная отправка СМС и email.</p>
+					</div>
+				</div>
+			</div>
+		</div> <!-- /.footer-one -->
+
+
+
+
+		<button class="scroll-top">
+			<i class="bi bi-arrow-up-short"></i>
+		</button>
+
+
+
+
+		<!-- Optional JavaScript _____________________________  -->
+
+		<!-- jQuery first, then Bootstrap JS -->
+		<!-- jQuery -->
+		<script src="static/vendor/jquery.min.js"></script>
+		<!-- Bootstrap JS -->
+		<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<!-- WOW js -->
+		<script src="static/vendor/wow/wow.min.js"></script>
+		<!-- Slick Slider -->
+		<script src="static/vendor/slick/slick.min.js"></script>
+		<!-- Fancybox -->
+		<script src="static/vendor/fancybox/fancybox.umd.js"></script>
+		<!-- Lazy -->
+		<script src="static/vendor/jquery.lazy.min.js"></script>
+		<!-- js Counter -->
+		<script src="static/vendor/jquery.counterup.min.js"></script>
+		<script src="static/vendor/jquery.waypoints.min.js"></script>
+		<!-- validator js -->
+		<script src="static/vendor/validator.js"></script>
+
+		<!-- Theme js -->
+		<script src="static/js/theme.js"></script>
+	</div> <!-- /.main-page-wrapper -->
+</body>
+
+</html>

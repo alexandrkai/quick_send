@@ -1,0 +1,61 @@
+# app/schemas.py
+from pydantic import BaseModel, Field, EmailStr, validator
+from typing import Optional
+from datetime import datetime
+import uuid
+from enum import Enum
+
+from app.models import UserRole, ChannelType, MessageStatus, ConsentStatus, VerificationType
+
+
+class UserCreate(BaseModel):
+    phone: str = Field(..., min_length=10, max_length=20)
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    role: Optional[UserRole] = UserRole.USER
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class ConsentCreate(BaseModel):
+    user_id: Optional[int] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+    @validator('phone', 'email')
+    def check_one_provided(cls, v, values, field):
+        if not values.get('phone') and not values.get('email'):
+            raise ValueError('Either phone or email must be provided')
+        return v
+
+class ConsentUpdate(BaseModel):
+    status: ConsentStatus
+
+class MessageCreate(BaseModel):
+    sender_user_id: Optional[int] = None
+    recipient_phone: Optional[str] = None
+    recipient_email: Optional[EmailStr] = None
+    text: str = Field(..., max_length=500)
+    channels: ChannelType
+    order_id: Optional[uuid.UUID] = None
+
+    @validator('recipient_phone', 'recipient_email')
+    def check_recipient_provided(cls, v, values, field):
+        if not values.get('recipient_phone') and not values.get('recipient_email'):
+            raise ValueError('Either recipient_phone or recipient_email must be provided')
+        return v
+
+class VerificationCodeCreate(BaseModel):
+    user_id: Optional[int] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
+    code: str = Field(..., min_length=6, max_length=6)
+    type: VerificationType
+
+    @validator('phone', 'email')
+    def check_one_provided(cls, v, values, field):
+        if not values.get('phone') and not values.get('email'):
+            raise ValueError('Either phone or email must be provided')
+        return v

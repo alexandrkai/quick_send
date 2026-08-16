@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}MSGPRO - Обратная связь{% endblock %}
+
+{% block content %}
+
+<!-- BANNER AREA -->
+<div class="rts-hosting-banner rts-hosting-banner-bg banner-default-height">
+    <div class="container">
+        <div class="row">
+            <div class="banner-area">
+                <div class="rts-hosting-banner rts-hosting-banner__content">
+                    <span class="starting__price" data-sal="slide-down" data-sal-delay="100" data-sal-duration="800">Поддержка</span>
+                    <h1 class="banner-title" data-sal="slide-down" data-sal-delay="200" data-sal-duration="800">
+                        Обратная связь
+                    </h1>
+                    <p class="slogan" data-sal="slide-down" data-sal-delay="300" data-sal-duration="800">
+                        Есть предложения, нашли ошибку или просто хотите поблагодарить? Напишите нам!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- BANNER AREA END -->
+
+<!-- FORM SECTION -->
+<section class="rts-contact-form section__padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="rts-contact-form__wrapper bg-white p-4 p-md-5 shadow-sm rounded">
+                    
+                    <form id="feedbackForm">
+                        
+                        <!-- БЛОК ДАННЫХ ПОЛЬЗОВАТЕЛЯ -->
+                        <div class="card bg-light border mb-4 p-3" id="userInfoBlock">
+                            <small class="text-muted text-uppercase fw-bold mb-2 d-block">
+                                {% if user %}Ваши данные (автоматически заполнено){% else %}Пожалуйста, представьтесь{% endif %}
+                            </small>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label small">Ваше Имя</label>
+                                        <input type="text" name="user_name" id="inp_user_name" class="form-control" placeholder="Иван" {% if user and user.username %}value="{{ user.username }}"{% endif %}>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label small">Телефон</label>
+                                        <input type="tel" name="user_phone" id="inp_user_phone" class="form-control" placeholder="+7 (999) 000-00-00" {% if user and user.phone %}value="{{ user.phone }}"{% endif %}>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label small">Email</label>
+                                        <input type="email" name="user_email" id="inp_user_email" class="form-control" placeholder="email@example.com" {% if user and user.email %}value="{{ user.email }}"{% endif %}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Скрытые технические поля -->
+                        <input type="hidden" name="page_url" id="inp_page_url">
+                        <input type="hidden" name="user_agent" id="inp_user_agent">
+
+                        <!-- ОБЩИЕ ПОЛЯ -->
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label class="form-label fw-bold">Тема обращения</label>
+                                    <select name="topic" class="form-control">
+                                        <option value="Вопрос по работе">Вопрос по работе сервиса</option>
+                                        <option value="Техническая ошибка">Техническая ошибка</option>
+                                        <option value="Пожелание">Пожелание / Идея</option>
+                                        <option value="Другое">Другое</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label class="form-label fw-bold">Ваше сообщение</label>
+                                    <textarea name="message" class="form-control" rows="5" placeholder="Опишите подробно суть вашего вопроса..." required></textarea>
+                                    <div class="form-text">
+                                        Чем подробнее вы опишете проблему, тем быстрее мы сможем помочь.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Сообщение об ошибке/успехе -->
+                        <div id="msg-area" class="alert d-none p-2 small mb-3" role="alert"></div>
+
+                        <!-- Кнопка отправки -->
+                        <div class="form-group">
+                            <button type="submit" class="rts-btn btn-primary btn__long w-100">
+                                Отправить сообщение <div class="spinner-border spinner-border-sm d-none" id="btn-spinner"></div>
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Данные пользователя из шаблона (если есть)
+    const currentUser = {{ user | tojson if user else 'null' }};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Заполняем технические поля
+        document.getElementById('inp_page_url').value = window.location.href;
+        document.getElementById('inp_user_agent').value = navigator.userAgent;
+
+        if (currentUser) {
+            const userInfoBlock = document.getElementById('userInfoBlock');
+            const label = userInfoBlock.querySelector('small');
+            let username = "неизвестный";
+            if (currentUser.username != undefined) {
+                username = currentUser.username || currentUser.phone;
+            } else if (currentUser.phone) {
+                username = currentUser.phone;
+            }
+            label.textContent = "Вы вошли как " + username;
+        }
+    });
+
+    const feedbackForm = document.getElementById('feedbackForm');
+    const msgArea = document.getElementById('msg-area');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const submitBtn = feedbackForm.querySelector('button[type="submit"]');
+
+    feedbackForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Собираем данные формы
+        const formData = new FormData(feedbackForm);
+        
+        msgArea.classList.add('d-none');
+        submitBtn.disabled = true;
+        btnSpinner.classList.remove('d-none');
+
+        try {
+            const response = await fetch('/api/feedback', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                msgArea.textContent = 'Спасибо! Ваше сообщение успешно отправлено.';
+                msgArea.classList.remove('d-none', 'alert-danger');
+                msgArea.classList.add('alert-success');
+                
+                feedbackForm.reset();
+                // Восстанавливаем тех. поля и данные пользователя
+                document.getElementById('inp_page_url').value = window.location.href;
+                document.getElementById('inp_user_agent').value = navigator.userAgent;
+                if (currentUser) {
+                    document.getElementById('inp_user_name').value = currentUser.username || '';
+                    document.getElementById('inp_user_phone').value = currentUser.phone || '';
+                    document.getElementById('inp_user_email').value = currentUser.email || '';
+                }
+            } else {
+                const errorData = await response.json();
+                msgArea.textContent = errorData.detail || 'Ошибка отправки.';
+                msgArea.classList.remove('d-none', 'alert-success');
+                msgArea.classList.add('alert-danger');
+            }
+        } catch (e) {
+            console.error(e);
+            msgArea.textContent = 'Ошибка сети. Проверьте подключение.';
+            msgArea.classList.remove('d-none', 'alert-success');
+            msgArea.classList.add('alert-danger');
+        } finally {
+            submitBtn.disabled = false;
+            btnSpinner.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock %}

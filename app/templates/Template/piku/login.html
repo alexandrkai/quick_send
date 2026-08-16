@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="keywords" content="рассылка, смс, email, бесплатно, вход, авторизация">
+	<meta name="description" content="Вход в сервис MSGPRO.RU — бесплатная отправка СМС и email.">
+    <meta property="og:site_name" content="MSGPRO">
+    <meta property="og:url" content="https://msgpro.ru">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MSGPRO.RU - Вход">
+	<meta name='og:image' content='images/assets/ogg.png'>
+	<!-- For IE -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<!-- For Resposive Device -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- For Window Tab Color -->
+	<meta name="theme-color" content="#0D1A1C">
+	<meta name="msapplication-navbutton-color" content="#0D1A1C">
+	<meta name="apple-mobile-web-app-status-bar-style" content="#0D1A1C">
+	<title>MSGPRO.RU - Вход</title>
+	<!-- Favicon -->
+	<link rel="icon" type="image/png" sizes="56x56" href="static/images/fav-icon/icon.png">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" media="all">
+	<!-- Main style sheet -->
+	<link rel="stylesheet" type="text/css" href="static/css/style.min.css" media="all">
+	<!-- responsive style sheet -->
+	<link rel="stylesheet" type="text/css" href="static/css/responsive.css" media="all">
+
+	<!--[if lt IE 9]>
+			<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+			<script src="static/vendor/html5shiv.js"></script>
+			<script src="static/vendor/respond.js"></script>
+		<![endif]-->
+</head>
+
+<body>
+	<div class="main-page-wrapper">
+		<!-- Preloader -->
+		<div id="preloader">
+			<div id="ctn-preloader" class="ctn-preloader">
+				<div class="icon"><img src="static/images/loader.svg" alt="" class="m-auto d-block"> <span></span></div>
+				<div class="txt-loading">
+					<span data-text-preloader="P" class="letters-loading">P</span>
+					<span data-text-preloader="I" class="letters-loading">I</span>
+					<span data-text-preloader="K" class="letters-loading">K</span>
+					<span data-text-preloader="U" class="letters-loading">U</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Header -->
+		<header class="theme-main-menu menu-style-two sticky-menu menu-overlay">
+			<div class="inner-content gap-one">
+				<div class="top-header position-relative">
+					<div class="d-flex align-items-center justify-content-between">
+						<div class="logo order-lg-0">
+							<a href="index.html" class="d-flex align-items-center">
+								<img src="static/images/logo/logo_02.svg" alt="">
+							</a>
+						</div>
+                        <div><a href="index.html" class="fw-500 text-dark">На главную</a></div>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<!-- Login Page -->
+		<div class="login-page position-relative z-1 d-flex align-items-center justify-content-center">
+            <div class="bg-wrapper">
+                <div class="user-data-form">
+                    <div class="form-wrapper">
+                        <div class="mb-50 sm-mb-30">
+                            <h2>Войти</h2>
+                            <p>Вы еще не зарегистрированы? <a href="signup.html">Регистрация</a></p>
+                        </div>
+
+                        <!-- ---------- НОВАЯ ФОРМА С ПЕРЕКЛЮЧАТЕЛЕМ ---------- -->
+                        <!-- Общее поле телефона -->
+                        <div class="mb-30">
+                            <label class="form-label fw-500">Телефон</label>
+                            <input type="tel" id="global-phone" class="form-control" placeholder="+7 (999) 000-00-00" required>
+                        </div>
+
+                        <!-- Переключатель метода -->
+                        <div class="d-flex justify-content-center mb-30">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="auth_method" id="method-sms" autocomplete="off"
+                                    checked onchange="toggleAuthMethod()">
+                                <label class="btn btn-outline-primary" for="method-sms">СМС</label>
+
+                                <input type="radio" class="btn-check" name="auth_method" id="method-password" autocomplete="off"
+                                    onchange="toggleAuthMethod()">
+                                <label class="btn btn-outline-primary" for="method-password">Пароль</label>
+                            </div>
+                        </div>
+
+                        <!-- Блок СМС -->
+                        <div id="sms-block">
+                            <div class="mb-3">
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="requestSmsCode()">
+                                        <span id="sms-btn-text">Получить код</span>
+                                        <div id="sms-spinner" class="spinner-border spinner-border-sm d-none"></div>
+                                    </button>
+                                </div>
+                                <div id="sms-status" class="form-text mt-2 small text-center"></div>
+                                <div id="sms-error" class="alert alert-danger d-none p-2 small mb-3" role="alert"></div>
+                            </div>
+
+                            <form id="sms-login-form" onsubmit="handleSmsLogin(event)">
+                                <div class="mb-3">
+                                    <label class="form-label">Код из SMS</label>
+                                    <input type="text" name="code" class="form-control" placeholder="123456" required>
+                                </div>
+
+                                <div id="login-error" class="alert alert-danger d-none p-2 small mb-3" role="alert"></div>
+
+                                <button type="submit" class="btn-four w-100 tran3s d-block mt-20 mb-50">
+                                    Войти <div class="spinner-border spinner-border-sm d-none" id="login-spinner"></div>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Блок пароля -->
+                        <div id="password-block" class="d-none">
+                            <form onsubmit="handlePasswordLogin(event)">
+                                <div class="mb-3">
+                                    <label class="form-label">Пароль</label>
+                                    <div class="input-group">
+                                        <input type="password" name="password" class="form-control" placeholder="Ваш пароль" required>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword(this)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="pass-login-error" class="alert alert-danger d-none p-2 small mb-3" role="alert"></div>
+
+                                <button type="submit" class="btn-four w-100 tran3s d-block mt-20 mb-50">
+                                    Войти <div class="spinner-border spinner-border-sm d-none" id="pass-login-spinner"></div>
+                                </button>
+                            </form>
+                        </div>
+                        <!-- ------------------------------------------------ -->
+
+                    </div>
+                    <!-- /.form-wrapper -->
+                </div>
+                <!-- /.user-data-form -->
+            </div>
+			<p class="copyright-text"><span class="fw-500">@2026 MSGPRO.RU</span> Все права защищены</p>
+			<img src="static/images/shape/shape_94.svg" alt="" class="shapes shape_01">
+        </div>
+
+		<!-- Скрипты (jQuery и Bootstrap уже подключены в шаблоне) -->
+		<!-- Добавляем Bootstrap Icons (для иконки глаза) -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+		<script>
+			// Функция для показа уведомлений (toast) — упрощённая версия
+			function showToast(message, type = 'primary') {
+				// Если есть глобальный showToast из base.html, используем его, иначе создаём alert
+				if (typeof window.showToast === 'function') {
+					window.showToast(message, type);
+					return;
+				}
+				// fallback
+				alert(message);
+			}
+
+			// Получение cookie
+			function getCookie(name) {
+				const value = `; ${document.cookie}`;
+				const parts = value.split(`; ${name}=`);
+				if (parts.length === 2) return parts.pop().split(';').shift();
+				return null;
+			}
+
+			document.addEventListener('DOMContentLoaded', () => {
+				const savedPhone = getCookie('temp_phone');
+				if (savedPhone) {
+					const phoneInput = document.getElementById('global-phone');
+					if (phoneInput) phoneInput.value = savedPhone;
+				}
+				toggleAuthMethod();
+			});
+
+			function toggleAuthMethod() {
+				const isSms = document.getElementById('method-sms').checked;
+				const smsBlock = document.getElementById('sms-block');
+				const passBlock = document.getElementById('password-block');
+
+				if (isSms) {
+					smsBlock.classList.remove('d-none');
+					passBlock.classList.add('d-none');
+				} else {
+					smsBlock.classList.add('d-none');
+					passBlock.classList.remove('d-none');
+				}
+			}
+
+			async function requestSmsCode() {
+				const phone = document.getElementById('global-phone').value;
+				const statusDiv = document.getElementById('sms-status');
+				const btnText = document.getElementById('sms-btn-text');
+				const spinner = document.getElementById('sms-spinner');
+				const errorDiv = document.getElementById('sms-error');
+
+				if (!phone) {
+					showToast('Введите номер телефона', 'warning');
+					return;
+				}
+
+				btnText.textContent = 'Отправка...';
+				spinner.classList.remove('d-none');
+				statusDiv.innerHTML = '';
+				errorDiv.classList.add('d-none');
+				document.getElementById('login-error').classList.add('d-none');
+
+				try {
+					const formData = new FormData();
+					formData.append('phone', phone);
+
+					const response = await fetch('/api/auth/request-sms', {
+						method: 'POST',
+						body: formData
+					});
+
+					const data = await response.json();
+
+					if (response.ok && data.status === 'ok') {
+						statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle"></i> ${data.data}</span>`;
+						showToast('Код отправлен', 'success');
+					} else {
+						errorDiv.textContent = data.detail || 'Ошибка';
+						errorDiv.classList.remove('d-none');
+						showToast('Ошибка отправки кода', 'danger');
+					}
+				} catch (e) {
+					errorDiv.textContent = 'Ошибка соединения';
+					errorDiv.classList.remove('d-none');
+					showToast('Ошибка сети', 'danger');
+				} finally {
+					btnText.textContent = 'Получить код';
+					spinner.classList.add('d-none');
+				}
+			}
+
+			async function handleSmsLogin(event) {
+				event.preventDefault();
+				const phone = document.getElementById('global-phone').value;
+				const code = event.target.code.value;
+				const btnSpinner = document.getElementById('login-spinner');
+				const submitBtn = event.target.querySelector('button[type="submit"]');
+				const errorDiv = document.getElementById('login-error');
+
+				if (!phone) {
+					errorDiv.textContent = 'Укажите номер телефона';
+					errorDiv.classList.remove('d-none');
+					return;
+				}
+
+				submitBtn.disabled = true;
+				btnSpinner.classList.remove('d-none');
+				document.getElementById('sms-error').classList.add('d-none');
+				errorDiv.classList.add('d-none');
+
+				try {
+					const formData = new FormData();
+					formData.append('phone', phone);
+					formData.append('code', code);
+
+					const response = await fetch('/api/auth/verify-sms', {
+						method: 'POST',
+						body: formData
+					});
+
+					if (response.ok) {
+						window.location.href = '/messages/quick-send';
+					} else {
+						const data = await response.json();
+						errorDiv.textContent = data.detail || 'Неверный код';
+						errorDiv.classList.remove('d-none');
+						showToast('Неверный код', 'danger');
+					}
+				} catch (e) {
+					errorDiv.textContent = 'Ошибка входа';
+					errorDiv.classList.remove('d-none');
+					showToast('Ошибка входа', 'danger');
+				} finally {
+					submitBtn.disabled = false;
+					btnSpinner.classList.add('d-none');
+				}
+			}
+
+			async function handlePasswordLogin(event) {
+				event.preventDefault();
+				const phone = document.getElementById('global-phone').value;
+				const passwordInput = event.target.querySelector('input[name="password"]');
+				const password = passwordInput.value;
+				const errorDiv = document.getElementById('pass-login-error');
+				const btnSpinner = document.getElementById('pass-login-spinner');
+				const submitBtn = event.target.querySelector('button[type="submit"]');
+
+				errorDiv.classList.add('d-none');
+				submitBtn.disabled = true;
+				btnSpinner.classList.remove('d-none');
+
+				try {
+					const formData = new FormData();
+					formData.append('phone', phone);
+					formData.append('password', password);
+
+					const response = await fetch('/api/auth/password/login', {
+						method: 'POST',
+						body: formData
+					});
+
+					if (response.ok) {
+						window.location.href = '/messages/quick-send';
+					} else {
+						const data = await response.json();
+						errorDiv.textContent = data.detail || 'Ошибка входа';
+						errorDiv.classList.remove('d-none');
+						showToast('Ошибка входа', 'danger');
+					}
+				} catch (e) {
+					errorDiv.textContent = 'Ошибка сети';
+					errorDiv.classList.remove('d-none');
+					showToast('Ошибка сети', 'danger');
+				} finally {
+					submitBtn.disabled = false;
+					btnSpinner.classList.add('d-none');
+				}
+			}
+
+			function togglePassword(btn) {
+				const input = btn.previousElementSibling;
+				const icon = btn.querySelector('i');
+				if (input.type === 'password') {
+					input.type = 'text';
+					icon.classList.remove('bi-eye');
+					icon.classList.add('bi-eye-slash');
+				} else {
+					input.type = 'password';
+					icon.classList.remove('bi-eye-slash');
+					icon.classList.add('bi-eye');
+				}
+			}
+		</script>
+
+		<!-- Подключаем Bootstrap JS (уже есть в шаблоне, но на всякий случай) -->
+		<script src="static/vendor/jquery.min.js"></script>
+		<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+		<script src="static/vendor/wow/wow.min.js"></script>
+		<script src="static/vendor/slick/slick.min.js"></script>
+		<script src="static/vendor/fancybox/fancybox.umd.js"></script>
+		<script src="static/vendor/jquery.lazy.min.js"></script>
+		<script src="static/vendor/jquery.counterup.min.js"></script>
+		<script src="static/vendor/jquery.waypoints.min.js"></script>
+		<script src="static/vendor/validator.js"></script>
+		<script src="static/js/theme.js"></script>
+	</div>
+</body>
+
+</html>
