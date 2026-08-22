@@ -6,7 +6,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-from app.core.database import get_db
+from app.models.models import get_db
 from app.services.user import UserService
 from app.services.verification import VerificationService
 from app.services.consent import ConsentService
@@ -51,12 +51,12 @@ class MessageSendRequest(BaseModel):
     recipient_phone: Optional[str] = None
     recipient_email: Optional[str] = None
     text: str
-    channels: ChannelType = ChannelType.SMS
+    channels: ChannelType = ChannelType.PHONE
 
 class BulkMessageSendRequest(BaseModel):
     recipients: List[dict]  # [{"phone": "...", "email": "..."}, ...]
     text: str
-    channels: ChannelType = ChannelType.SMS
+    channels: ChannelType = ChannelType.PHONE
 
 
 # --- Эндпоинты для аутентификации (без регистрации) ---

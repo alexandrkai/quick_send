@@ -65,6 +65,7 @@
 							</button>
 							<div class="collapse navbar-collapse" id="navbarNav">
 								<ul class="navbar-nav align-items-lg-center">
+									<li class="nav-item"><a class="nav-link" href="/docs">API</a></li>
 									<li class="nav-item"><a class="nav-link" href="index.html">Главная</a></li>
 									<li class="nav-item dropdown">
 										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -72,8 +73,8 @@
 										</a>
 										<ul class="dropdown-menu">
 											<li><a href="quick_send.html" class="dropdown-item"><span>Быстрая отправка</span></a></li>
-											<li><a href="prohibit.html" class="dropdown-item"><span>Запрет рассылки</span></a></li>
-											<li><a href="allow.html" class="dropdown-item"><span>Разрешение рассылки</span></a></li>
+											<li><a href="consent.html?action=blocked" class="dropdown-item"><span>Запрет рассылки</span></a></li>
+											<li><a href="consent.html?action=allowed" class="dropdown-item"><span>Разрешение рассылки</span></a></li>
 										</ul>
 									</li>
 									<li class="nav-item dropdown">
@@ -327,8 +328,8 @@
 							<p class="fs-24 fw-500 text-dark mt-30">По умолчанию любой номер телефона или email-адрес может получать сообщения от отправителей, использующих MSGPRO.RU. Однако владелец контакта в любой момент может запретить или разрешить рассылку.</p>
 							<p class="fs-22 text-dark mt-20">Чтобы изменить статус, подтвердите владение контактом через код, отправленный на ваш номер или email. Это просто и безопасно.</p>
 							<div class="d-flex flex-wrap gap-3 mt-40">
-								<a href="prohibit.html" class="btn-two xl">Запретить рассылку</a>
-								<a href="allow.html" class="btn-one">Разрешить рассылку</a>
+								<a href="consent.html?action=block" class="btn-two xl">Запретить рассылку</a>
+								<a href="consent.html?action=allow" class="btn-one">Разрешить рассылку</a>
 							</div>
 							<p class="mt-30 small text-muted">Ссылки ведут на страницы управления, которые будут доступны после завершения разработки.</p>
 						</div>
@@ -372,8 +373,8 @@
 								<div class="footer-nav mb-20">
 									<ul class="footer-nav-link style-none">
 										<li><a href="quick_send.html">Быстрая отправка</a></li>
-										<li><a href="prohibit.html">Запретить рассылку</a></li>
-										<li><a href="allow.html">Разрешить рассылку</a></li>
+										<li><a href="consent.html?action=block">Запретить рассылку</a></li>
+										<li><a href="consent.html?action=allow">Разрешить рассылку</a></li>
 									</ul>
 								</div>
 							</div>

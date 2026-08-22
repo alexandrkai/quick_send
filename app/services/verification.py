@@ -3,41 +3,58 @@ import random
 import string
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from app.crud import verification_code as crud_vc
-from app.models.models import VerificationCode, VerificationType
+from app.crud.verification_code import verification_code as crud_verification_code
+
+from app.models.models import VerificationCode,Channel
 from app.schemas.verification_code import VerificationCodeCreate
-from app.utils.sms_provider import send_sms
-from app.utils.email_provider import send_email
+
+from typing import Optional
 
 class VerificationService:
     def __init__(self, db: Session):
         self.db = db
 
-    def generate_code(self, phone: str = None, email: str = None, type: VerificationType = VerificationType.LOGIN) -> str:
-        # Генерация 6-значного кода
+    def generate_code(self, value: str, channel:Channel,type: str = "login") -> str:
         code = ''.join(random.choices(string.digits, k=6))
-        expires_at = datetime.utcnow() + timedelta(minutes=5)
+        expires_at = datetime.now() + timedelta(minutes=5)
         vc_in = VerificationCodeCreate(
-            phone=phone,
-            email=email,
+            value=value,
             code=code,
             type=type,
+            channel_id=channel.id,
             expires_at=expires_at
         )
-        vc = crud_vc.create(self.db, obj_in=vc_in)
-        # Отправка кода
-        if phone:
-            send_sms(phone, f"Ваш код: {code}")
-        elif email:
-            send_email(email, "Код подтверждения", f"Ваш код: {code}")
-        return code
+        vc = crud_verification_code.create(self.db, obj_in=vc_in)
+        return vc
 
-    def verify_code(self, phone: str = None, email: str = None, code: str=None) -> bool:
-        vc = crud_vc.get_valid_code(self.db, phone=phone, email=email, code=code)
+    def verify_code(self, channel:Channel,value: str, code: str, type: str) -> Optional[VerificationCode]:
+        vc = crud_verification_code.get_valid_code(self.db, channel=channel,value=value, code=code, type=type)
         if not vc:
-            return False
-        crud_vc.mark_used(self.db, code_obj=vc)
-        return True
+            return None
+        crud_verification_code.mark_used(self.db, code_obj=vc)
+        return vc
+    
+    def get_active_code(self, channel: Channel, value: str,type:str) -> VerificationCode:
+        """
+        Проверяет наличие активного (неиспользованного и неистекшего) кода
+        для указанного канала и значения.
 
-    def get_valid_code_obj(self, phone: str = None, email: str = None, code: str=None) -> VerificationCode | None:
-        return crud_vc.get_valid_code(self.db, phone=phone, email=email, code=code)
+        :param channel_id: ID канала (из таблицы channels)
+        :param value: телефон или email
+        :return: (код, оставшееся время в секундах) или (None, 0)
+        """
+    
+        # Ищем последний созданный активный код
+        vc = self.db.query(VerificationCode).filter(
+            VerificationCode.channel_id == channel.id,
+            VerificationCode.value == value,
+            VerificationCode.used == False,
+            VerificationCode.type==type
+        ).order_by(VerificationCode.created_at.desc()).first()
+        now = datetime.now()
+        if vc:
+            if vc.expires_at > now:
+                return vc
+            else:
+                vc.used=True
+        return None

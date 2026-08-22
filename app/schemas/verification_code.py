@@ -1,26 +1,24 @@
-# app/schemas/verification_code.py
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 from app.models.models import VerificationType
 
 class VerificationCodeBase(BaseModel):
-    phone: Optional[str] = None
-    email: Optional[str] = None
+    user_id: Optional[int] = None
+    value: str
+    channel_id:int
     code: str
     type: VerificationType
     expires_at: datetime
 
 class VerificationCodeCreate(VerificationCodeBase):
-    user_id: Optional[int] = None
+    pass
 
-# Добавляем схему для обновления (пока только used)
 class VerificationCodeUpdate(BaseModel):
     used: Optional[bool] = None
 
 class VerificationCodeInDB(VerificationCodeBase):
     id: int
-    user_id: Optional[int]
     used: bool
     created_at: datetime
 

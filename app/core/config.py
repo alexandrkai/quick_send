@@ -11,6 +11,8 @@ class Settings(BaseSettings):
 
     SMS_PROVIDER: str = "dummy"
     EMAIL_PROVIDER: str = "dummy"
+    
+    DEBUG: bool = True   
 
     class Config:
         env_file = ".env"

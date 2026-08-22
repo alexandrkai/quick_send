@@ -1,4 +1,3 @@
-# app/crud/base.py
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
@@ -7,6 +6,7 @@ from app.models.models import Base
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=Dict[str, Any])
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=Dict[str, Any])
+FilterSchemaType = TypeVar("FilterSchemaType", bound=Dict[str, Any])
 
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
@@ -22,6 +22,44 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         for key, value in kwargs.items():
             if hasattr(self.model, key):
                 query = query.filter(getattr(self.model, key) == value)
+        return query.offset(skip).limit(limit).all()
+    
+    # альтернатива get_multi
+    def filter(
+    self,
+    db: Session,
+    *,
+    filter_in: Optional[FilterSchemaType] = None,
+    skip: int = 0,
+    limit: int = 100,
+    **kwargs
+) -> List[ModelType]:
+        query = db.query(self.model)
+
+        # Обработка filter_in (Pydantic-схема или словарь)
+        if filter_in is not None:
+            if isinstance(filter_in, dict):
+                filters = filter_in
+            else:
+                # exclude_unset=True — убирает поля, которые вообще не были заданы
+                filters = filter_in.dict(exclude_unset=True)
+            for key, value in filters.items():
+                if hasattr(self.model, key):
+                    column = getattr(self.model, key)
+                    if value is None:
+                        query = query.filter(column.is_(None))   # IS NULL
+                    else:
+                        query = query.filter(column == value)    # обычное равенство
+
+        # Обработка kwargs (переданные явно)
+        for key, value in kwargs.items():
+            if hasattr(self.model, key):
+                column = getattr(self.model, key)
+                if value is None:
+                    query = query.filter(column.is_(None))
+                else:
+                    query = query.filter(column == value)
+
         return query.offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:

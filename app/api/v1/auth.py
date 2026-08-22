@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import timedelta
 
-from app.core.database import get_db
+from app.models.models import get_db
 from app.services.user import UserService
 from app.services.verification import VerificationService
 from app.core.security import create_access_token, verify_password, get_password_hash

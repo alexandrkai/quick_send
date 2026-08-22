@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="запрет, разрешение, рассылка, согласие, спам, MSGPRO">
+    <meta name="description" content="Управление согласием на получение сообщений от MSGPRO.RU. Запретите или разрешите рассылку на свой номер или email.">
+    <meta property="og:site_name" content="MSGPRO">
+    <meta property="og:url" content="https://msgpro.ru">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MSGPRO - Управление согласием">
+    <meta name='og:image' content='/static/images/assets/ogg.png'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0D1A1C">
+    <meta name="msapplication-navbutton-color" content="#0D1A1C">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0D1A1C">
+    <title>MSGPRO - Управление согласием</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="56x56" href="/static/images/fav-icon/icon.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" media="all">
+    <!-- Main style sheet -->
+    <link rel="stylesheet" type="text/css" href="/static/css/style.min.css" media="all">
+    <!-- responsive style sheet -->
+    <link rel="stylesheet" type="text/css" href="/static/css/responsive.css" media="all">
+    <!-- Bootstrap Icons (CDN, не требует префикса) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+
+<body>
+    <div class="main-page-wrapper dark-bg p-30">
+        <!-- Preloader -->
+        <div id="preloader">
+            <div id="ctn-preloader" class="ctn-preloader">
+                <div class="icon"><img src="/static/images/loader.svg" alt="" class="m-auto d-block"> <span></span></div>
+                <div class="txt-loading">
+                    <span data-text-preloader="M" class="letters-loading">M</span>
+                    <span data-text-preloader="S" class="letters-loading">S</span>
+                    <span data-text-preloader="G" class="letters-loading">G</span>
+                    <span data-text-preloader="P" class="letters-loading">P</span>
+                    <span data-text-preloader="R" class="letters-loading">R</span>
+                    <span data-text-preloader="O" class="letters-loading">O</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="theme-main-menu menu-style-one">
+            <div class="inner-content bg-wrapper bg-one border-20">
+                <div class="top-header position-relative">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="logo order-lg-0">
+                            <a href="index.html" class="d-flex align-items-center">
+                                <img src="/static/images/logo/logo_01.svg" alt="">
+                            </a>
+                        </div>
+                        <nav class="navbar navbar-expand-lg p0 order-lg-2">
+                            <button class="navbar-toggler d-block d-lg-none" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+                                aria-label="Toggle navigation">
+                                <span></span>
+                            </button>
+                            <div class="collapse navbar-collapse" id="navbarNav">
+                                <ul class="navbar-nav align-items-lg-center">
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                            data-bs-auto-close="outside" aria-expanded="false">Сервисы</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="quick_send.html" class="dropdown-item"><span>Быстрая отправка</span></a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                            data-bs-auto-close="outside" aria-expanded="false">Правила сервиса</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="terms.html" class="dropdown-item"><span>Условия использования</span></a></li>
+                                            <li><a href="privacy.html" class="dropdown-item"><span>Политика конфиденциальности</span></a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a href="consent.html?action=blocked" class="dropdown-item"><span>🚫 Запретить рассылку</span></a></li>
+                                            <li><a href="consent.html?action=allowed" class="dropdown-item"><span>✅ Разрешить рассылку</span></a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                                            data-bs-auto-close="outside" aria-expanded="false">Информация о нас</a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="about-us-v1.html" class="dropdown-item"><span>О нас</span></a></li>
+                                            <li><a href="contact-v1.html" class="dropdown-item"><span>Контакт</span></a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Inner Banner -->
+        <div class="inner-banner-two bg-one border-30 z-1 pt-100 lg-pt-60 pb-90 lg-pb-50 mt-30 lg-mt-20 position-relative">
+            <div class="container">
+                <div class="title-one text-center">
+                    <h2 id="pageTitle">Управление согласием</h2>
+                </div>
+            </div>
+            <img src="/static/images/shape/shape_89.svg" alt="" class="shapes shape_01">
+        </div>
+
+        <!-- Основной блок -->
+        <div class="service-details mt-150 xl-mt-120 lg-mt-80">
+            <div class="container">
+                <div class="wrapper m-auto" style="max-width: 820px;">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm p-4 p-lg-5">
+                                <form id="consentForm">
+                                    <!-- Выбор канала -->
+                                    <div class="mb-4 p-3 bg-light border rounded">
+                                        <label class="form-label fw-bold mb-2">Канал связи</label>
+                                        <select id="channelType" class="form-select">
+                                            <option value="phone">Телефон</option>
+                                            <option value="email">Email</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Значение с динамическим placeholder -->
+                                    <div class="mb-4">
+                                        <label for="contactValue" class="form-label fw-bold">Контактные данные</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">
+                                                <i class="bi bi-person"></i>
+                                            </span>
+                                            <input type="text" id="contactValue" class="form-control" placeholder="+7 (999) 000-00-00">
+                                        </div>
+                                        <small id="inputHint" class="text-muted">Введите номер телефона в формате +7 (999) 000-00-00</small>
+                                    </div>
+
+                                    <!-- Кнопка получения кода -->
+                                    <div class="mb-4">
+                                        <button type="button" id="requestCodeBtn" class="btn-two w-100">
+                                            Получить код
+                                        </button>
+                                    </div>
+
+                                    <!-- Поле для кода -->
+                                    <div id="codeBlock" style="display: none;">
+                                        <div class="mb-4">
+                                            <label for="verificationCode" class="form-label fw-bold">Код подтверждения</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light">
+                                                    <i class="bi bi-shield-lock"></i>
+                                                </span>
+                                                <input type="text" id="verificationCode" class="form-control" placeholder="Введите 6-значный код">
+                                            </div>
+                                        </div>
+                                        <div id="actionButtons" style="display: none;">
+                                            <button type="button" id="allowBtn" class="btn-four w-100 mt-2">Разрешить рассылку</button>
+                                            <button type="button" id="blockBtn" class="btn-one w-100 mt-2">Запретить рассылку</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Сообщение -->
+                                    <div id="statusMessage" class="mt-4"></div>
+
+                                    <!-- Дополнительная информация -->
+                                    <div class="mt-4 small text-muted">
+                                        <i class="bi bi-info-circle"></i> После подтверждения статус будет изменён для указанного контакта.
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-one border-30 bg-one mt-30">
+            <div class="position-relative z-1">
+                <div class="container">
+                    <div class="position-relative">
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="footer-intro mb-30">
+                                    <div class="logo">
+                                        <a href="index.html">
+                                            <img src="/static/images/logo/logo_01.svg" alt="">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-3 col-6">
+                                <div class="footer-nav mb-20">
+                                    <ul class="footer-nav-link style-none">
+                                        <li><a href="about-us-v1.html">О нас</a></li>
+                                        <li><a href="contact-v1.html">Контакты</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-3 col-6">
+                                <div class="footer-nav mb-20">
+                                    <ul class="footer-nav-link style-none">
+                                        <li><a href="quick_send.html">Быстрая отправка</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-3 col-sm-6">
+                                <div class="footer-nav mb-20">
+                                    <ul class="footer-nav-link style-none">
+                                        <li><a href="login.html">Войти</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <div class="footer-nav mb-20">
+                                    <ul class="footer-nav-link style-none">
+                                        <li><a href="consent.html?action=blocked">Запретить рассылку</a></li>
+                                        <li><a href="consent.html?action=allowed">Разрешить рассылку</a></li>
+                                        <li><a href="terms.html">Условия использования</a></li>
+                                        <li><a href="privacy.html">Политика конфиденциальности</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="copyright-text m0"><strong class="text-dark">2026.</strong> Все права защищены. MSGPRO.RU — бесплатная отправка СМС и email.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="scroll-top">
+            <i class="bi bi-arrow-up-short"></i>
+        </button>
+
+        <!-- Scripts -->
+        <script src="/static/vendor/jquery.min.js"></script>
+        <script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="/static/vendor/wow/wow.min.js"></script>
+        <script src="/static/vendor/slick/slick.min.js"></script>
+        <script src="/static/vendor/fancybox/fancybox.umd.js"></script>
+        <script src="/static/vendor/jquery.lazy.min.js"></script>
+        <script src="/static/vendor/jquery.counterup.min.js"></script>
+        <script src="/static/vendor/jquery.waypoints.min.js"></script>
+        <script src="/static/vendor/validator.js"></script>
+        <script src="/static/js/theme.js"></script>
+
+        <script>
+            (function() {
+                // Определяем действие из URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const action = urlParams.get('action') || 'blocked';
+                const pageTitle = document.getElementById('pageTitle');
+                
+
+                // Элементы
+                const channelType = document.getElementById('channelType');
+                const contactValue = document.getElementById('contactValue');
+                const inputHint = document.getElementById('inputHint');
+                const requestCodeBtn = document.getElementById('requestCodeBtn');
+                const codeBlock = document.getElementById('codeBlock');
+                const actionButtons = document.getElementById('actionButtons');
+                const statusMessage = document.getElementById('statusMessage');
+                const verificationCode = document.getElementById('verificationCode');
+                const allowBtn = document.getElementById('allowBtn');
+                const blockBtn = document.getElementById('blockBtn');
+
+                if (action === 'blocked') {
+                    pageTitle.textContent = 'Запрет рассылки';
+                    allowBtn.style.display = 'none';
+                } else {
+                    pageTitle.textContent = 'Разрешение рассылки';
+                    blockBtn.style.display = 'none';
+                }
+
+                // Функция обновления подсказок
+                function updatePlaceholder() {
+                    const type = channelType.value;
+                    if (type === 'phone') {
+                        contactValue.placeholder = '+7 (999) 000-00-00';
+                        inputHint.textContent = 'Введите номер телефона в формате +7 (999) 000-00-00';
+                    } else {
+                        contactValue.placeholder = 'email@example.com';
+                        inputHint.textContent = 'Введите адрес электронной почты';
+                    }
+                    // Очищаем поле при смене типа
+                    contactValue.value = '';
+                    // Скрываем кнопки и поле кода, если они были показаны
+                    codeBlock.style.display = 'none';
+                    actionButtons.style.display = 'none';
+                    statusMessage.innerHTML = '';
+                }
+
+                // Обработчик изменения select
+                channelType.addEventListener('change', updatePlaceholder);
+                // Инициализация при загрузке
+                updatePlaceholder();
+
+                // Показать сообщение
+                function showStatus(text, type) {
+                    statusMessage.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+                }
+
+                // Запрос кода
+                requestCodeBtn.addEventListener('click', async function() {
+                    const value = contactValue.value.trim();
+                    const type = channelType.value;
+                    if (!value) {
+                        showStatus('Введите контактные данные', 'danger');
+                        return;
+                    }
+                    // Простая валидация
+                    if (type === 'phone' && !value.match(/^\+7\d{10}$/)) {
+                        showStatus('Введите номер в формате +7XXXXXXXXXX (10 цифр после +7)', 'danger');
+                        return;
+                    }
+                    if (type === 'email' && !value.includes('@')) {
+                        showStatus('Введите корректный email', 'danger');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/api/v1/consent/request', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({value: value, channel: type ,status:action})
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            showStatus(data.message, 'success');
+                            codeBlock.style.display = 'block';
+                            actionButtons.style.display = 'none';
+                        } else {
+                            showStatus(data.detail || 'Ошибка отправки кода', 'danger');
+                        }
+                    } catch (e) {
+                        showStatus('Ошибка соединения', 'danger');
+                    }
+                });
+
+                // Отправка статуса
+                async function submitConsent(status) {
+                    const value = contactValue.value.trim();
+                    const type = channelType.value;
+                    const code = verificationCode.value.trim();
+                    if (!code) {
+                        showStatus('Введите код подтверждения', 'danger');
+                        return;
+                    }
+                    try {
+                        const response = await fetch('/api/v1/consent/confirm', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ value:value, channel: type, code, status })
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            showStatus(data.message || 'Статус обновлён!', 'success');
+                            codeBlock.style.display = 'none';
+                            actionButtons.style.display = 'none';
+                            verificationCode.value="";
+                        } else {
+                            showStatus(data.detail || 'Ошибка подтверждения', 'danger');
+                        }
+                    } catch (e) {
+                        showStatus('Ошибка соединения', 'danger');
+                    }
+                }
+
+                allowBtn.addEventListener('click', function() {
+                    submitConsent('allowed');
+                });
+
+                blockBtn.addEventListener('click', function() {
+                    submitConsent('blocked');
+                });
+
+                // Показ кнопок при вводе кода
+                verificationCode.addEventListener('input', function() {
+                    if (this.value.length >= 4) {
+                        actionButtons.style.display = 'block';
+                    } else {
+                        actionButtons.style.display = 'none';
+                    }
+                });
+            })();
+        </script>
+    </div>
+</body>
+
+</html>

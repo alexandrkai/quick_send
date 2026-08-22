@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
 
-from app.core.database import get_db
+from app.models.models import get_db
 from app.services.message import MessageService
 from app.services.consent import ConsentService
 from app.models.models import ChannelType,User

@@ -1,9 +1,8 @@
 # app/api/v1/users.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from app.core.database import get_db
 from app.core.dependencies import get_current_user
-from app.models.models import User
+from app.models.models import User,get_db
 from app.schemas.user import UserUpdate
 from app.services.user import UserService
 
