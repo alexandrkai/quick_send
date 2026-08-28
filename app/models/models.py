@@ -1,8 +1,8 @@
 # app/models.py
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, ForeignKey, UniqueConstraint, Index, Text, JSON, create_engine
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, ForeignKey, UniqueConstraint, Index, Text, JSON, create_engine,UUID as SA_UUID,text
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker,Session
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 import enum
 import uuid
@@ -16,7 +16,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def get_db():
-    db = SessionLocal()
+    db:Session = SessionLocal()
     try:
         yield db
     finally:
@@ -97,7 +97,7 @@ class ChannelIdentifier(Base, IdentifierMixin, CreateUpdate):
     __tablename__ = "channel_identifiers"
 
     channel_id = Column(Integer, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
-    field_name = Column(String(50), nullable=False)      # 'number_phone', 'address_email'
+    field_name = Column(String(50), nullable=False)      # 'phone', 'email'
     validation_regex = Column(Text, nullable=True)
 
     __table_args__ = (
@@ -122,6 +122,7 @@ class User(Base, CreateUpdate, IdentifierMixin):
     verification_codes = relationship("VerificationCode", back_populates="user")
     contacts = relationship(
         "UserContact", back_populates="user", cascade="all, delete-orphan")
+    orders = relationship("Order", back_populates="user")
 
 
 class UserContact(Base, IdentifierMixin, CreatedMixin):
@@ -161,24 +162,22 @@ class Consent(Base, IdentifierMixin, CreateUpdate):
     verification_code = relationship("VerificationCode")
 
 
-class Message(Base, CreateUpdate, IdentifierMixin):
+class Message(Base, CreateUpdate):
     __tablename__ = "messages"
-    __table_args__ = (
-        Index('idx_message_order_id', 'order_id'),
-        Index('idx_message_created_at', 'created_at'),
-        Index('idx_message_recipient_value', 'recipient_value'),
-    )
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    channel_identifier_id = Column(Integer, ForeignKey("channel_identifiers.id", ondelete="CASCADE"), nullable=False)
-    recipient_value = Column(String(255), nullable=False, index=True)
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    channel_identifier_id = Column(Integer, ForeignKey("channel_identifiers.id"), nullable=False)
+    recipient_value = Column(String(255), nullable=False)
     text = Column(Text, nullable=False)
     status = Column(Enum(MessageStatus), default=MessageStatus.PENDING)
-    order_id = Column(PGUUID(as_uuid=True), default=uuid.uuid4, nullable=False)
     error_message = Column(Text, nullable=True)
     delivered_at = Column(DateTime, nullable=True)
 
+    # связи
     sender = relationship("User", back_populates="messages")
+    order = relationship("Order", back_populates="messages")
     channel_identifier = relationship("ChannelIdentifier")
 
 
@@ -199,3 +198,40 @@ class VerificationCode(Base, CreatedMixin, IdentifierMixin):
 
     user = relationship("User", back_populates="verification_codes")
     channel = relationship("Channel", back_populates="verification_codes")
+    
+
+class Feedback(Base, CreateUpdate):
+    __tablename__ = "feedbacks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=True)   # может быть NULL
+    phone = Column(String(20), nullable=True)   # добавили телефон
+    email = Column(String(100), nullable=False)  # сделаем обязательным
+    topic = Column(String(50), nullable=True)
+    message = Column(Text, nullable=False)
+    page_url = Column(String(255), nullable=True)
+    user_agent = Column(String(255), nullable=True)
+    
+class OrderStatus(str, enum.Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+from sqlalchemy.dialects.postgresql import ARRAY
+
+class Order(Base, CreateUpdate):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(SA_UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    sender_phone = Column(String(20), nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
+    channels = Column(ARRAY(String), nullable=False, default=[])  # массив каналов: ['sms', 'email', 'telegram', ...]
+    total_recipients = Column(Integer, default=0)
+    text_preview = Column(String(1000), nullable=True)
+
+    user = relationship("User", back_populates="orders")
+    messages = relationship("Message", back_populates="order", cascade="all, delete-orphan")

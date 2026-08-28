@@ -24,25 +24,29 @@ def request_consent_verification(data: ConsentRequest, db: Session = Depends(get
     consent_service = ConsentService(db)
     try:
         result = consent_service.request_verification(data,"consent")
-        # если код был ранее отправлен
-        if "message" in result:
+        if result["result"]=="consent":
+            # такой consent уже есть
+            result.update({"status": "ok"})
             return result
-        if "vc" in result:
-            vc=result['vc']
-            time_wait=int((vc.expires_at - datetime.now()).total_seconds())
-        if "is_new" in result:
-            if result["is_new"]:
-                # TODO этот код надо отправить!!
-                # Отправка на контакт
-                if data.value.startswith('+') or data.value.isdigit():
-                    send_sms(data.value, f"Ваш код: {vc.code}. У вас {time_wait} секунд на его активацию")
-                else:
-                    send_email(data.value, "Код подтверждения", f"Ваш код: {vc.code}. У вас {time_wait} секунд на его активацию")
-        if data.channel == 'email':
-            channel_message="Провверьте почтовый яцщик."
+        vc=result['vc']
+        time_wait=int((vc.expires_at - datetime.now()).total_seconds())
+        if result["is_new"]:
+            # TODO этот код надо отправить!!
+            # Отправка на контакт
+            if data.value.startswith('+') or data.value.isdigit():
+                send_sms(data.value, f"Ваш код: {vc.code}. У вас {time_wait} секунд на его активацию")
+            else:
+                send_email(data.value, "Код подтверждения", f"Ваш код: {vc.code}. У вас {time_wait} секунд на его активацию")
+            channel_message="Код отправлен."
         else:
-            channel_message="Провверьте телефон."
-        return {"status": "ok", "message": f"Код отправлен. {channel_message} Ваш код: {vc.code}. {time_wait} секунд на его активацию"}
+            channel_message="Код ранее был отправлен."
+        if data.channel == 'email':
+            channel_message+="Проверьте почтовый яцщик."
+        else:
+            channel_message+="Проверьте телефон."
+        
+        
+        return {"status": "ok", "message": f"{channel_message} Код: {vc.code}. Осталось {time_wait} секунд на его активацию","result":result['result']}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -64,9 +68,9 @@ def confirm_consent(data: ConsentConfirm, db: Session = Depends(get_db)):
         else:
             message="Дано согласие "
         if data.channel=="phone":
-            message+="на рассылку с нашего сервиса смс-сообщений"
+            message+="на рассылку с нашего сервиса смс-сообщений на указанный телефон"
         else:
-            message+="на рассылку с нашего сервиса почтовых сообщений"
+            message+="на рассылку с нашего сервиса почтовых сообщений на указанный email"
         return {"status": "ok", "message": message}
             
     except Exception as e:

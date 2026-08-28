@@ -60,26 +60,29 @@ class ConsentService:
         #     result['consent']=consent
         if data.status==ConsentStatus.BLOCKED:
             if consent and consent.status==ConsentStatus.BLOCKED:
-                result.update({"status": "ok"})
                 if data.channel == ContactType.EMAIL:
-                    result.update({"message": "Вы уже ранее запретили рассылку с нашего сервиса на Ваш email"})
+                    result.update({"message": "Ранее был установлен запрет рассылки писем с нашего сервиса на указанный email"})
                 elif data.channel == ContactType.PHONE:
-                    result.update({"message": "Вы уже ранее запретили рассылку СМС с нашего сервиса на Ваш телефон"})
-                return result
+                    result.update({"message": "Ранее был установлен запрет рассылки СМС с нашего сервиса на указанный телефон"})
+                # код возврата - есть consent
+                
         elif data.status==ConsentStatus.ALLOWED:
             if not consent or (consent and consent.status==ConsentStatus.ALLOWED):
-                result.update({"status": "ok"})
                 if data.channel == ContactType.EMAIL:
-                    result.update({"message": "У Вас уже есть разрешение на рассылку с нашего сервиса на Ваш email"})
+                    result.update({"message": "Уже есть разрешение на рассылку с нашего сервиса на указанный email"})
                 elif data.channel == ContactType.PHONE:
-                    result.update({"message": "У Вас уже есть разрешение на рассылку СМС с нашего сервиса на Ваш телефон"})
-                return result
-            pass
-        # 2. проверяем, отправляли мы ранее код
+                    result.update({"message": "Уже есть разрешение на рассылку СМС с нашего сервиса на указанный телефон"})
+                # код возврата - есть consent(т.е. он на самом деле отсутствует в таблице, что означает, что есть разрешение по умоляанию)
+        if result:
+            result['result']="consent"
+            return result
+        # 2. если consent нет, то проверяем, отправляли мы ранее код
         channel=crud_channel.get_by_code(self.db,code=data.channel) 
         vc=self.verification_service.get_active_code(channel,data.value,type)
         if vc:
             result.update( {"vc":vc,"is_new":False})
+            # есть действующий код
+            result['result']="vc"
             return result
         # 3. Генерируем код через VerificationService
         vc = self.verification_service.generate_code(
@@ -87,6 +90,8 @@ class ConsentService:
             channel=channel,
             type=type
         )
+         # есть новый код
+        result['result']="vc"
         result.update( {"vc":vc,"is_new":True})
         return result
 

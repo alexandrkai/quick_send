@@ -8,7 +8,7 @@ from app.models.models import get_db
 from app.services.message import MessageService
 from app.services.consent import ConsentService
 from app.models.models import ChannelType,User
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user,get_current_user_optional
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -29,37 +29,21 @@ class SendSingleRequest(BaseModel):
     channels: List[str]
 
 @router.post("/quick-send")
-def quick_send(
+async def quick_send(
     data: QuickSendRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
-    """Быстрая отправка (авторизованный пользователь)."""
-    # Определяем каналы
-    channels_set = set(data.channels)
-    if "both" in channels_set:
-        channel_type = ChannelType.BOTH
-    elif "sms" in channels_set and "email" in channels_set:
-        channel_type = ChannelType.BOTH
-    elif "sms" in channels_set:
-        channel_type = ChannelType.SMS
-    elif "email" in channels_set:
-        channel_type = ChannelType.EMAIL
-    else:
-        raise HTTPException(status_code=400, detail="Не выбран ни один канал")
-
-    message_service = MessageService(db)
-    # Отправляем массово
+    service = MessageService(db)
     try:
-        messages = message_service.send_bulk(
-            sender_phone=current_user.phone,
+        order = service.send_bulk(
+            sender_phone=current_user.phone if current_user else data.sender_phone,
             recipients=data.contacts,
             text=data.text,
-            channels=channel_type,
-            sender_user_id=current_user.id
+            channel_type=data.channel_type,
+            sender_user_id=current_user.id if current_user else None
         )
-        order_id = messages[0].order_id if messages else None
-        return {"status": "ok", "order_id": str(order_id), "count": len(messages)}
+        return {"status": "ok", "order_uuid": str(order.uuid), "count": len(order.messages)}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

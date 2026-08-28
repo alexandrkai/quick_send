@@ -148,7 +148,7 @@
         btnSpinner.classList.remove('d-none');
 
         try {
-            const response = await fetch('/api/feedback', {
+            const response = await fetch('/api/v1/feedback/', {
                 method: 'POST',
                 body: formData
             });

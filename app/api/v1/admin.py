@@ -2,13 +2,17 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from app.models.models import engine, Base, get_db, SessionLocal
+from app.models.models import engine, Base, get_db, SessionLocal,create_engine,text
 import logging
 from app.core.config import settings
 from app.crud.channel import channel as channel_CRUD
+from app.crud.feedback import feedback
 from app.crud.channel_identifier import channel_identifier
 from app.schemas.channel import ChannelCreate
 from app.schemas.channel_identifier import ChannelIdentifierCreate
+from sqlalchemy.exc import OperationalError
+from urllib.parse import urlparse
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -24,25 +28,38 @@ async def reset_database(db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Доступ запрещён")
 
     try:
+        # --- 1. Проверяем существование базы данных и создаём, если нет ---
+        db_url = settings.DATABASE_URL
+        parsed = urlparse(db_url)
+        db_name = parsed.path.lstrip('/')
+        # Строка подключения без указания базы (для подключения к postgres/template1)
+        admin_url = f"postgresql://{parsed.username}:{parsed.password}@{parsed.hostname}:{parsed.port}/postgres"
+        admin_engine = create_engine(admin_url, isolation_level="AUTOCOMMIT")
+
+        with admin_engine.connect() as admin_conn:
+            # Проверка существования базы
+            result = admin_conn.execute(text("SELECT 1 FROM pg_database WHERE datname = :dbname"), {"dbname": db_name})
+            exists = result.fetchone()
+            if not exists:
+                # Создаём базу
+                admin_conn.execute(text(f"CREATE DATABASE {db_name}"))
+                logger.info(f"База данных '{db_name}' создана")
+
+        admin_engine.dispose()
+
+        # --- 2. Теперь подключаемся к созданной базе и выполняем операции ---
         # Удаляем все таблицы
         Base.metadata.drop_all(bind=engine)
         logger.info("Все таблицы удалены")
 
-        # СОЗДАЁМ ТАБЛИЦЫ И ВСТАВЛЯЕМ ДАННЫЕ В ОДНОЙ ТРАНЗАКЦИИ
-        # Используем connection напрямую, чтобы контролировать транзакцию
+        # Создаём таблицы и вставляем данные в одной транзакции
         with engine.connect() as conn:
-            # Начинаем транзакцию
             with conn.begin():
-                # Создаём таблицы
                 Base.metadata.create_all(bind=conn)
                 logger.info("Таблицы созданы")
 
-                # Теперь вставляем данные через ту же сессию, привязанную к этому connection
-                # Создаём сессию, привязанную к нашему connection
                 session = Session(bind=conn)
-                
                 try:
-                    # Вставляем начальные данные
                     phone_channel = channel_CRUD.create(session, obj_in=ChannelCreate(code="phone"))
                     channel_identifier.create(
                         session,
@@ -63,10 +80,7 @@ async def reset_database(db: Session = Depends(get_db)):
                         )
                     )
 
-                    # Сессия закоммитится автоматически при выходе из with conn.begin()
-                    # Но можно и явно: session.commit()
                     logger.info("Начальные данные добавлены")
-                    
                 except Exception as e:
                     logger.error(f"Ошибка при вставке данных: {e}")
                     raise
@@ -81,3 +95,15 @@ async def reset_database(db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Ошибка при пересоздании БД: {str(e)}"
         )
+
+@router.get("/feedbacks")
+async def get_feedbacks(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    # current_user: User = Depends(get_current_user) # позже добавим авторизацию
+):
+    # if current_user.role != "admin":
+    #     raise HTTPException(status_code=403, detail="Доступ запрещён")
+    feedbacks = feedback.get_multi(db, skip=skip, limit=limit)
+    return feedbacks

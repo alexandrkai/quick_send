@@ -1,114 +1,141 @@
-# app/web/routes.py
-from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Request, Depends
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
+from sqlalchemy.orm import Session
+from app.models.models import get_db,ChannelType,ConsentStatus, ContactType
+from app.services.consent import ConsentService
 
 router = APIRouter()
-
-# Если вы хотите использовать Jinja2 для динамических данных (например, год)
 templates = Jinja2Templates(directory="app/templates")
-templates.env.auto_reload = True
-templates.env.cache_size = 0
 
-# Маршруты для страниц (используем FileResponse для простоты, но можно и Jinja2)
-@router.get("/")
-@router.get("/index.html")
-async def root():
-    return FileResponse("app/templates/index.html")
+# Список существующих статических файлов
+VALID_PAGES = {
+   "quick_send.html", 
+    "terms.html", "privacy.html", 
+    "login.html", "signup.html"
+}
 
-@router.get("/quick_send.html", response_class=HTMLResponse)
-async def quick_send():
-    return FileResponse("app/templates/quick_send.html")
+# Карта коротких редиректов
+REDIRECT_MAP = {
+    "quick-send": "quick_send.html",
+    "about": "about.html",
+    "contact": "contact.html",
+    "terms": "terms.html",
+    "privacy": "privacy.html",
+    # "login": "login.html",
+    # "register": "signup.html",
+    "consent": f"consent.html?action={ConsentStatus.BLOCKED.value}",
+}
+
+# --- ПОДВИЖНЫЕ И КОНКРЕТНЫЕ РОУТЫ (FastAPI проверяет их первыми) ---
+
+@router.get("/", response_class=HTMLResponse)
+@router.get("/index.html", response_class=HTMLResponse)
+async def index_page(request: Request):
+    
+    # Передаём Enum-объекты в контекст
+    return templates.TemplateResponse(
+        request,
+        name="index.html",
+        context={
+            "page_title": "MSGPRO - Бесплатная отправка СМС и email",
+            "ConsentStatus": ConsentStatus,  # передаём весь Enum
+            "ChannelType": ChannelType
+        }
+    )
 
 @router.get("/about.html", response_class=HTMLResponse)
-async def about():
-    return FileResponse("app/templates/about.html")
+async def about_page(request: Request):
+    
+    # Передаём Enum-объекты в контекст
+    return templates.TemplateResponse(
+        request,
+        name="about.html",
+        context={
+            "page_title": "MSGPRO - О нас",
+            "ConsentStatus": ConsentStatus, 
+            "ChannelType": ChannelType
+        }
+    )
 
 @router.get("/contact.html", response_class=HTMLResponse)
-async def contact():
-    return FileResponse("app/templates/contact.html")
-
-@router.get("/terms.html", response_class=HTMLResponse)
-async def terms():
-    return FileResponse("app/templates/terms.html")
-
-@router.get("/privacy.html", response_class=HTMLResponse)
-async def privacy():
-    return FileResponse("app/templates/privacy.html")
-
-@router.get("/login.html", response_class=HTMLResponse)
-async def login():
-    return FileResponse("app/templates/login.html")
-
-@router.get("/signup.html", response_class=HTMLResponse)
-async def signup():
-    return FileResponse("app/templates/signup.html")
-
+async def about_page(request: Request):
+    
+    # Передаём Enum-объекты в контекст
+    return templates.TemplateResponse(
+        request,
+        name="contact.html",
+        context={
+            "page_title": "MSGPRO - О нас",
+            "ConsentStatus": ConsentStatus, 
+            "ChannelType": ChannelType
+        }
+    )
+# http://127.0.0.1:8888/consent.html?action=allowed&phone=%2B79175729812
 @router.get("/consent.html", response_class=HTMLResponse)
-async def consent(request: Request):
-    # Вы можете получить данные из БД или из query-параметров
-    # Например, действие (запрет/разрешение) из URL: ?action=block
-    action = request.query_params.get("action", "block")
-    
-    # Здесь получите из БД статус согласия (пример)
-    # consent_status = get_consent_status(...)
-    
-    context = {
-        "request": request,
-        "page_title": "Управление согласием",
-        "action": action,
-        "consent_status": "allowed",  # или данные из БД
-        "message": "Добро пожаловать!"
-    }
-    return templates.TemplateResponse("consent.html", context)
+async def consent_page(request: Request, db: Session = Depends(get_db)):
+    # Получаем параметры из URL
+    action = request.query_params.get("action", ConsentStatus.BLOCKED.value)  # значение по умолчанию
+    phone = request.query_params.get("phone")
+    email = request.query_params.get("email")
+    message=""
+    # Определяем канал и значение
+    if phone:
+        channel = ChannelType.PHONE.value
+        value = phone
+    elif email:
+        channel = ChannelType.EMAIL.value
+        value = email
+    else:
+        channel = None
+        value = None
+    service=ConsentService(db)
+    if channel and value:
+        consent=service.get_consent_by_channel_code_and_value(value,channel_code=channel)
+        if not consent:
+            if channel == ContactType.EMAIL:
+                message="Нет запрета на рассылку с нашего сервиса на указанный email"
+            elif channel == ContactType.PHONE:
+                message="Нет запрета на рассылку СМС с нашего сервиса на указанный телефон"
+        if consent and consent.status==ConsentStatus.ALLOWED:
+            if channel == ContactType.EMAIL:
+                message="Есть разрешение на рассылку с нашего сервиса на указанный email"
+            elif channel == ContactType.PHONE:
+                message="Есть разрешение на рассылку СМС с нашего сервиса на указанный телефон"
+        if consent and consent.status==ConsentStatus.BLOCKED:
+            if channel == ContactType.EMAIL:
+                message="Ранее был установлен запрет рассылки писем с нашего сервиса на указанный email"
+            elif channel == ContactType.PHONE:
+                message="Ранее был установлен запрет рассылки СМС с нашего сервиса на указанный телефон"
+    # Передаём Enum-объекты в контекст
+    return templates.TemplateResponse(
+        request,
+        name="consent.html",
+        context={
+            "page_title": "Управление согласием",#"Запрет рассылки" if action == ConsentStatus.BLOCKED.value else "Разрешение рассылки",
+            "action": action,
+            "channel": channel,
+            "value": value,
+            "ConsentStatus": ConsentStatus,  # передаём весь Enum
+            "ChannelType": ChannelType,
+            "message":message
+        }
+    )
 
-@router.get("/consent", response_class=HTMLResponse)
-async def consent_page(request: Request):
-    return templates.TemplateResponse("app/templates/consent.html", {"request": request})
+# --- ДИНАМИЧЕСКИЕ РОУТЫ (FastAPI проверяет их в последнюю очередь) ---
 
-# Редиректы для удобства (короткие URL)
-@router.get("/quick-send")
-async def quick_send_redirect():
-    return RedirectResponse(url="app/templates/quick_send.html")
+# Динамический обработчик для статических HTML страниц
+@router.get("/{page_name}.html", response_class=HTMLResponse)
+async def serve_static_pages(page_name: str):
+    full_name = f"{page_name}.html"
+    if full_name in VALID_PAGES:
+        return FileResponse(f"app/templates/{full_name}")
+    return HTMLResponse(content="Страница не найдена", status_code=404)
 
-@router.get("/about")
-async def about_redirect():
-    return RedirectResponse(url="app/templates/about.html")
 
-@router.get("/contact")
-async def contact_redirect():
-    return RedirectResponse(url="app/templates/contact.html")
-
-@router.get("/terms")
-async def terms_redirect():
-    return RedirectResponse(url="app/templates/terms.html")
-
-@router.get("/privacy")
-async def privacy_redirect():
-    return RedirectResponse(url="app/templates/privacy.html")
-
-@router.get("/login")
-async def login_redirect():
-    return RedirectResponse(url="app/templates/login.html")
-
-@router.get("/register")
-async def register_redirect():
-    return RedirectResponse(url="app/templates/signup.html")
-
-# @router.get("/prohibit.html", response_class=HTMLResponse)
-# async def block():
-#     return templates.TemplateResponse("block.html", {"request": {}})
-
-# @router.get("/allow.html", response_class=HTMLResponse)
-# async def allow():
-#     return templates.TemplateResponse("allow.html", {"request": {}})
-
-@router.get("/block")
-async def block_redirect():
-    return RedirectResponse(url="/consent?action=block")
-
-@router.get("/allow")
-async def allow_redirect():
-    return RedirectResponse(url="/consent?action=allow")
+# Динамический обработчик для коротких ссылок-редиректов
+@router.get("/{path}")
+async def dynamic_redirects(path: str):
+    if path in REDIRECT_MAP:
+        return RedirectResponse(url=f"/{REDIRECT_MAP[path]}")
+    return HTMLResponse(content="Маршрут не найден", status_code=404)
