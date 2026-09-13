@@ -1,0 +1,115 @@
+# app/services/user_consent_document.py
+from typing import Dict, List, Optional
+from sqlalchemy.orm import Session
+
+from app.crud.approval import crud_approval
+from app.models.models import S_Document, ApprovalType, UserDocument
+
+
+class ApprovalService:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_active_documents(self) -> Dict[str, Optional[S_Document]]:
+        """Получает текущие активные документы для Условий и Политики."""
+        terms = (
+            self.db.query(S_Document)
+            .filter(
+                S_Document.doc_type == ApprovalType.TERMS,
+                S_Document.is_active.is_(True),
+            )
+            .first()
+        )
+        privacy = (
+            self.db.query(S_Document)
+            .filter(
+                S_Document.doc_type == ApprovalType.PRIVACY,
+                S_Document.is_active.is_(True),
+            )
+            .first()
+        )
+        return {"terms": terms, "privacy": privacy}
+
+    def check_need_consent(self, identifier_value: str) -> Dict[str, any]:
+        """
+        Проверяет, требуется ли пользователю принять документы.
+        Возвращает need_consent=True и данные документов, если согласие отсутствует или устарело.
+        """
+        docs = self.get_active_documents()
+        active_terms = docs["terms"]
+        active_privacy = docs["privacy"]
+
+        if not active_terms or not active_privacy:
+            raise ValueError("Активные версии документов не настроены в БД")
+
+        has_terms = crud_approval.get_by_document_and_identifier(
+            self.db,
+            document_id=active_terms.id,
+            identifier_value=identifier_value,
+        )
+        has_privacy = crud_approval.get_by_document_and_identifier(
+            self.db,
+            document_id=active_privacy.id,
+            identifier_value=identifier_value,
+        )
+
+        need_consent = not (has_terms and has_privacy)
+
+        return {
+            "need_consent": need_consent,
+            "terms": {
+                "id": active_terms.id,
+                "version": active_terms.version,
+                "title": active_terms.title,
+                "content": active_terms.content,
+            }
+            if need_consent
+            else None,
+            "privacy": {
+                "id": active_privacy.id,
+                "version": active_privacy.version,
+                "title": active_privacy.title,
+                "content": active_privacy.content,
+            }
+            if need_consent
+            else None,
+        }
+
+    def record_consents_for_active_documents(
+        self,
+        *,
+        identifier_value: str,
+        verification_code_id: Optional[int] = None,
+        user_id: Optional[int] = None,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ) -> List[UserDocument]:
+        """
+        Фиксирует согласие пользователя на все текущие активные документы.
+        Создает записи только по тем документам, которые еще не были подписаны.
+        """
+        docs = self.get_active_documents()
+        created_consents = []
+
+        for doc in [docs["terms"], docs["privacy"]]:
+            if not doc:
+                continue
+
+            existing = crud_approval.get_by_document_and_identifier(
+                self.db,
+                document_id=doc.id,
+                identifier_value=identifier_value,
+            )
+            if not existing:
+                consent = crud_approval.create_consent(
+                    self.db,
+                    document_id=doc.id,
+                    identifier_value=identifier_value,
+                    user_id=user_id,
+                    verification_code_id=verification_code_id,
+                    ip_address=ip_address,
+                    user_agent=user_agent,
+                )
+                created_consents.append(consent)
+
+        return created_consents

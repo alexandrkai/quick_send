@@ -1,0 +1,24 @@
+[
+    {
+        "code": "phone",
+        "description": "Телефон",
+        "identifiers": [
+            {
+                "name": "phone",
+                "validation_regex": "^\\+7\\(?\\d{3}\\)?[ -]?\\d{3}[ -]?\\d{2}[ -]?\\d{2}$",
+                "is_default": true
+            }
+        ]
+    },
+    {
+        "code": "email",
+        "description": "Электронная почта",
+        "identifiers": [
+            {
+                "name": "email",
+                "validation_regex": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+                "is_default": true
+            }
+        ]
+    }
+]

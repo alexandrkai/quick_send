@@ -1,13 +1,18 @@
-# app/services/user.py
 from sqlalchemy.orm import Session
-from app.crud import user as crud_user
-from app.schemas.user import UserCreate, UserUpdate
-from app.core.security import get_password_hash, verify_password
-from app.models.models import User
+from app.config.config import settings
+from app.crud.user import crud_user
+from app.models.models import User,VerificationType
+from app.schemas import  LoginApiResponse,PhoneRequest
+from app.core.security import get_password_hash, verify_password,create_access_token
+from app.services.channel import ChannelService
+# from app.services.verification import VerificationService
+
 
 class UserService:
     def __init__(self, db: Session):
         self.db = db
+        self.channel_service=ChannelService(self.db)
+        # self.verification_service = VerificationService(db)
 
     def get_user_by_phone(self, phone: str) -> User | None:
         return crud_user.get_by_phone(self.db, phone=phone)
@@ -16,13 +21,14 @@ class UserService:
         return crud_user.get_by_email(self.db, email=email)
 
     def create_user(self, phone: str, email: str = None, full_name: str = None, password: str = None) -> User:
-        user_in = UserCreate(
+        password_hash = get_password_hash(password) if password else None
+        return crud_user.create_with_phone(
+            self.db,
             phone=phone,
             email=email,
             full_name=full_name,
-            password_hash=get_password_hash(password) if password else None
+            password_hash=password_hash
         )
-        return crud_user.create(self.db, obj_in=user_in)
 
     def authenticate(self, phone: str, password: str) -> User | None:
         user = self.get_user_by_phone(phone)
@@ -31,6 +37,18 @@ class UserService:
         if not verify_password(password, user.password_hash):
             return None
         return user
-
-    def update_user(self, user: User, update_data: UserUpdate) -> User:
-        return crud_user.update(self.db, db_obj=user, obj_in=update_data)
+    
+    def find_and_create_user(self,phone):
+        user=self.get_user_by_phone(phone)
+        if not user: 
+            user=crud_user.create_with_phone(self.db,phone=phone)
+        return user
+    
+    def create_token(self,phone,user=None):
+        if not user:
+            user = self.find_and_create_user(phone)
+        # Создаём токен
+        token = create_access_token({"sub": user.phone})
+        return token
+    
+    

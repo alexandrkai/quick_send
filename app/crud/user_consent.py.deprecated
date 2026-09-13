@@ -1,0 +1,20 @@
+from typing import Optional
+from sqlalchemy.orm import Session
+from app.crud.base import CRUDBase
+from app.models.models import Consent
+from app.schemas.consent import ConsentCreate, ConsentUpdate
+
+class CRUDConsent(CRUDBase[Consent, ConsentCreate, ConsentUpdate]):
+    def get_latest_by_phone(self, db: Session, phone: str) -> Optional[Consent]:
+        return db.query(Consent).filter(
+            Consent.phone == phone
+        ).order_by(Consent.created_at.desc()).first()
+
+    def get_by_phone_and_versions(self, db: Session, phone: str, terms_version_id: int, privacy_version_id: int) -> Optional[Consent]:
+        return db.query(Consent).filter(
+            Consent.phone == phone,
+            Consent.terms_version_id == terms_version_id,
+            Consent.privacy_version_id == privacy_version_id
+        ).first()
+
+crud_user_consent = CRUDConsent(Consent)

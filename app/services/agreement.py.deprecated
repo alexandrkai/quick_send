@@ -1,0 +1,208 @@
+# app/services/consent.py
+from sqlalchemy.orm import Session
+from typing import Optional
+from datetime import datetime
+from pydantic import BaseModel
+from app.crud.channel_identifier import crud_channel_identifier
+from app.crud.permission_prohibition import crud_agreement
+from app.crud.verification_code import crud_verification_code
+from app.crud.channel import crud_channel
+from app.crud.contact import crud_contact
+from app.models.models import PermissionProhibition, PermissionProhibitionType, ChannelType, S_Channel, ContactType, VerificationCode, VerificationType, Contact
+from app.services.verification import VerificationService
+from app.core.exceptions import ConsentException
+from app.schemas import *
+from app.services.contact import ContactService
+
+
+class AgreementService:
+    def __init__(self, db: Session):
+        self.db = db
+        self.verification_service = VerificationService(db)
+        self.contact_service = ContactService(db)
+
+    def get_agreement_by_contact(self, contact: Contact):
+        return crud_contact.
+
+    def get_agreement_by_channel_code_and_value(self, value: str, *, channel_code: Optional[str] = None, channel: Optional[str] = None) -> Optional[PermissionProhibition]:
+        if channel_code:
+            channel = crud_channel.get_by_code(self.db, code=channel_code)
+        return crud_agreement.get_by_channel_and_value(self.db, channel=channel, value=value)
+
+    def create_or_update_agreement(self, channel: S_Channel, value: str, status: PermissionProhibitionType, verification_code_id: Optional[int] = None) -> AgreementRequestSMSResponse:
+        """Создаем или обновляем существующее соглашение"""
+        # ищем в наличии согласия
+        agreement = self.get_agreement_by_channel_code_and_value(
+            value, channel=channel)
+        if agreement:
+            if agreement.status == status:
+                if status == PermissionProhibitionType.ALLOWED:
+                    raise Exception(
+                        "Согласие на рассылку сообщений уже предоставлено!")
+                else:
+                    raise Exception(
+                        "Запрет на рассылку сообщений уже предоставлено!")
+            # обновляем
+            agreement = crud_agreement.update(self.db, db_obj=agreement, obj_in={
+                "status": status,
+                "confirmed_at": datetime.now(),
+                "verification_code_id": verification_code_id
+            })
+            return AgreementRequestSMSResponse(agreement=agreement, is_new=False)
+        else:
+            consent_in = AgreementCreate(
+                channel_id=channel.id,
+                value=value,
+                status=status,
+                confirmed_at=datetime.now(),
+                verification_code_id=verification_code_id
+            )
+            agreement = crud_agreement.create(self.db, obj_in=consent_in)
+        return AgreementRequestSMSResponse(agreement=agreement, is_new=True)
+
+    def request_verification(self, data: AgreementRequestSMS, type: str) -> dict:
+        """Генерирует код и отправляет его на указанный контакт."""
+        # 1. проверяем наличие текущего согласия на работу с каналом
+        result = dict()
+        consent = self.get_agreement_by_channel_code_and_value(
+            data.value, channel_code=data.channel_code)
+        # если есть consent и статусы его совпадают
+        if (consent and consent.status == data.status) or (not consent and data.status == PermissionProhibitionType.ALLOWED):
+            message = self.description_status_consent(
+                channel=data.channel_code, value=data.value, consent=consent)
+            result["message"] = message
+            result['result'] = "consent"
+            return result
+        # message=""
+        # if data.status==ConsentStatus.BLOCKED:
+        #     # есть consent и он установлен
+        #     if consent:
+        #         if consent.status==ConsentStatus.BLOCKED:
+        #             if data.channel == ContactType.EMAIL:
+        #                 message="Ранее был установлен запрет рассылки писем с нашего сервиса на указанный email"
+        #             elif data.channel == ContactType.PHONE:
+        #                 message="Ранее был установлен запрет рассылки СМС с нашего сервиса на указанный телефон"
+        #             result["message"]=message
+        #             result['result']="consent"
+        #             return result
+        # elif data.status==ConsentStatus.ALLOWED:
+        #     if not consent:
+        #         if data.channel == ContactType.EMAIL:
+        #             message="Есть разрешение на рассылку писем с нашего сервиса на указанный email"
+        #         elif data.channel == ContactType.PHONE:
+        #             message="Есть разрешение на рассылку СМС с нашего сервиса на указанный телефон"
+
+        #     if consent and consent.status==ConsentStatus.ALLOWED:
+        #         if data.channel == ContactType.EMAIL:
+        #             message="Дано разрешение на рассылку писем с нашего сервиса на указанный email"
+        #         elif data.channel == ContactType.PHONE:
+        #             message="Дано разрешение на рассылку СМС с нашего сервиса на указанный телефон"
+        #         # код возврата - есть consent(т.е. он на самом деле отсутствует в таблице, что означает, что есть разрешение по умоляанию)
+        #     result["message"]=message
+        #     result['result']="consent"
+        #     return result
+        # 2. если consent нет, то проверяем, отправляли мы ранее код
+        channel = crud_channel.get_by_code(self.db, code=data.channel_code)
+        vcs: VerificationCode = crud_verification_code.get_multi(self.db, order_by=VerificationCode.expires_at.desc(
+        ), channel_id=channel.id, value=data.value, type=type, used=False)
+        vc = vcs[0] if len(vcs) > 0 else None
+        if vc:
+            # код не протух?
+            if datetime.now() >= vc.expires_at:
+                result.update({"vc": vc, "is_new": False})
+                # есть действующий код
+                result['result'] = "vc"
+                return result
+        # 3. Генерируем код через VerificationService
+        vc = self.verification_service.generate_code(
+            value=data.value,
+            channel=channel,
+            type=type
+        )
+        # есть новый код
+        result['result'] = "vc"
+        result.update({"vc": vc, "is_new": True})
+        return result
+
+    def confirm_consent(self, channel_code: str, value: str, code: str, status: PermissionProhibitionType) -> bool:
+        """Подтверждение кода и установка статуса."""
+        channel = crud_channel.get_by_code(self.db, code=channel_code)
+        # Проверяем код
+        vc = self.verification_service.verify_code(
+            channel=channel,
+            value=value,
+            code=code,
+            type="consent"
+        )
+        if not vc:
+            return False
+        # Создаём или обновляем согласие
+        self.create_or_update_agreement(
+            channel=channel,
+            value=value,
+            status=status,
+            verification_code_id=vc.id
+        )
+        return True
+
+    def description_status_consent(self, *, channel, value, consent=None):
+        message = ""
+        if not consent and (channel and value):
+            consent = self.get_agreement_by_channel_code_and_value(
+                value, channel_code=channel)
+        if not consent:
+            if channel == ContactType.EMAIL:
+                message = "Нет запрета на рассылку с нашего сервиса на указанный email"
+            elif channel == ContactType.PHONE:
+                message = "Нет запрета на рассылку СМС с нашего сервиса на указанный телефон"
+        else:
+            if consent.status == PermissionProhibitionType.ALLOWED:
+                if channel == ContactType.EMAIL:
+                    message = "Есть разрешение на рассылку с нашего сервиса на указанный email"
+                elif channel == ContactType.PHONE:
+                    message = "Есть разрешение на рассылку СМС с нашего сервиса на указанный телефон"
+            if consent.status == PermissionProhibitionType.BLOCKED:
+                if channel == ContactType.EMAIL:
+                    message = "Ранее был установлен запрет на рассылку писем с нашего сервиса на указанный email"
+                elif channel == ContactType.PHONE:
+                    message = "Ранее был установлен запрет на рассылку СМС с нашего сервиса на указанный телефон"
+        return message
+
+    def request_agreement_sms(self, data: AgreementRequestSMS)-> AgreementRequestSMSResponse:
+        # получаем инфо о канале
+        is_new:bool=False
+        message=""
+        channel = crud_channel.get_by_code(self.db, code=data.channel_code)
+        channel_identifier = next(
+            (s for s in channel.identifiers if s.name == "phone"), None)
+        if not channel_identifier:
+            raise ValueError(
+                "Спецификация поля 'phone' для данного канала не найдена")
+        # находим контакт или его создаем
+        contact = self.contact_service.get_or_create_contact(
+            channel_identifier, data.value)
+
+        # ищем agreement
+        agreement = crud_agreement.get_by_contact(contact)
+        if agreement:
+            if agreement.status==data.status:
+                if data.status==PermissionProhibitionStatus.ALLOWED:
+                    message=""
+        # ищем есть ли текущий верификационный код
+        vc = self.verification_service.filter_active_code(
+            contact=contact, type=VerificationType.AGREEMENT.value)
+        if vc:
+            # return AgreementRequestSMSResponse(
+            is_new=False
+            #     verifi_code=vc,
+            #     agreement=agreement
+            # )
+        else:
+            vc = self.verification_service.generate_code(
+            contact=contact, type=VerificationType.AGREEMENT.value)
+            is_new=False
+        return AgreementRequestSMSResponse(
+            is_new=True,
+            verifi_code=vc,
+            agreement=agreement
+        )

@@ -1,7 +1,7 @@
 # app/services/rate_limit.py
 import redis
 from sqlalchemy.orm import Session
-from app.core.config import settings
+from app.config.config import settings
 
 class RateLimitService:
     def __init__(self, db: Session):

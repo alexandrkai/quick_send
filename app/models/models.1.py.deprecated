@@ -1,0 +1,277 @@
+# app/models.py
+
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, ForeignKey, UniqueConstraint, Index, Text, JSON, create_engine,UUID as SA_UUID,text
+
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker,Session
+from sqlalchemy.dialects.postgresql import UUID as PGUUID,ARRAY
+import enum
+import uuid
+from sqlalchemy.sql import func
+from app.core.config import settings
+
+# --- Подключение к БД ---
+engine = create_engine(settings.DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
+
+def get_db():
+    db:Session = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+Channels = [
+    {"name": "phone",
+     "type_contacts": [
+         {"name": "number_phone",
+          "regex": r"^\+7\(?\d{3}\)?[ -]?\d{3}[ -]?\d{2}[ -]?\d{2}$"}
+     ]},
+    {"name": "email",
+     "type_contacts": [
+         {"name": "address_email",
+          "regex": r"^[^@\s]+@[^@\s]+\.[^@\s]+$"}
+     ]}
+    # Telegram пока исключён
+]
+
+# --- Enum ---
+
+class ChannelType(str, enum.Enum):
+    PHONE = "phone"
+    EMAIL = "email"
+
+class ContactType(str, enum.Enum):
+    PHONE = "phone"
+    EMAIL = "email"
+
+class MessageStatus(str, enum.Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    DELIVERED = "delivered"
+    FAILED = "failed"
+
+class ConsentStatus(str, enum.Enum):
+    ALLOWED = "allowed"
+    BLOCKED = "blocked"
+
+class VerificationType(str, enum.Enum):
+    LOGIN = "login"
+    CONSENT = "consent"
+
+class UserRole(str, enum.Enum):
+    USER = "user"
+    ADMIN = "admin"
+
+class DocumentType(str, enum.Enum):
+    TERMS = "terms"
+    PRIVACY = "privacy"
+
+# --- Миксины ---
+
+class IdentifierMixin:
+    id = Column(Integer, primary_key=True, index=True)
+
+class CreatedMixin:
+    created_at = Column(DateTime, server_default=func.now())
+
+class UpdatedMixin:
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+class CreateUpdate(CreatedMixin, UpdatedMixin):
+    pass
+# --- Модели ---
+
+class Channel(Base, IdentifierMixin, CreateUpdate):
+    __tablename__ = "channels"
+
+    code = Column(String(20), unique=True, nullable=False)  # 'phone', 'email'
+    identifiers = relationship(
+        "ChannelIdentifier", back_populates="channel", cascade="all, delete-orphan")
+    consents = relationship("Consent", back_populates="channel")  # связь с согласиями
+    verification_codes = relationship("VerificationCode", back_populates="channel")  # связь с кодами
+
+class ChannelIdentifier(Base, IdentifierMixin, CreateUpdate):
+    __tablename__ = "channel_identifiers"
+
+    channel_id = Column(Integer, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(50), nullable=False)      # 'phone', 'email'
+    validation_regex = Column(Text, nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint('channel_id', 'name', name='uq_channel_field'),
+    )
+
+    channel = relationship("Channel", back_populates="identifiers")
+    user_contacts = relationship("UserContact", back_populates="channel_identifier")
+
+class User(Base, CreateUpdate, IdentifierMixin):
+    __tablename__ = "users"
+
+    phone = Column(String(20), unique=True, nullable=False, index=True)
+    email = Column(String(100), unique=True, nullable=True, index=True)
+    contact_data = Column(JSON, nullable=False, default=dict)  # доп. каналы: {"telegram": "@username", "whatsapp": "+..."}
+    full_name = Column(String(100), nullable=True)
+    password_hash = Column(String(255), nullable=True)
+    role = Column(Enum(UserRole), default=UserRole.USER)
+    is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)
+
+    messages = relationship("Message", back_populates="sender")
+    verification_codes = relationship("VerificationCode", back_populates="user")
+    contacts = relationship("UserContact", back_populates="user", cascade="all, delete-orphan")
+    orders = relationship("Order", back_populates="user")
+
+    __table_args__ = (
+        Index('idx_user_phone', 'phone'),
+        Index('idx_user_email', 'email'),
+        # Опционально: GIN-индекс для быстрого поиска по JSONB (если используете PostgreSQL)
+        # Index('idx_user_contact_data', 'contact_data', postgresql_using='gin'),
+    )
+
+class UserContact(Base, IdentifierMixin, CreatedMixin):
+    __tablename__ = "user_contacts"
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    channel_identifier_id = Column(Integer, ForeignKey("channel_identifiers.id", ondelete="CASCADE"), nullable=False)
+    channel_identifier_value = Column(String(255), nullable=False, index=True)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'channel_identifier_id', name='uq_user_channel_identifier'),
+        Index('ix_channel_identifier_value', 'channel_identifier_value'),
+        Index('ix_user_contacts_user_id', 'user_id'),
+    )
+
+    user = relationship("User", back_populates="contacts")
+    channel_identifier = relationship("ChannelIdentifier", back_populates="user_contacts")
+
+class Consent(Base, IdentifierMixin, CreateUpdate):
+    __tablename__ = "consents"
+    __table_args__ = (
+        UniqueConstraint('channel_id', 'value', name='uq_consent_channel_value'),
+        Index('ix_consent_value', 'value'),
+    )
+
+    # Ссылка на канал (phone или email) – внешний ключ на Channel.id
+    channel_id = Column(Integer, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
+    # Само значение (номер телефона или email)
+    value = Column(String(255), nullable=False, index=True)
+    status = Column(Enum(ConsentStatus), default=ConsentStatus.ALLOWED)
+    confirmed_at = Column(DateTime, nullable=True)
+    verification_code_id = Column(Integer, ForeignKey("verification_codes.id"), nullable=True)
+
+    # Связи
+    channel = relationship("Channel", back_populates="consents")
+    verification_code = relationship("VerificationCode")
+
+class Message(Base, CreateUpdate):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    channel_identifier_id = Column(Integer, ForeignKey("channel_identifiers.id"), nullable=False)
+    recipient_value = Column(String(255), nullable=False)
+    text = Column(Text, nullable=False)
+    status = Column(Enum(MessageStatus), default=MessageStatus.PENDING)
+    error_message = Column(Text, nullable=True)
+    delivered_at = Column(DateTime, nullable=True)
+
+    # связи
+    sender = relationship("User", back_populates="messages")
+    order = relationship("Order", back_populates="messages")
+    channel_identifier = relationship("ChannelIdentifier")
+
+class VerificationCode(Base, CreatedMixin, IdentifierMixin):
+    __tablename__ = "verification_codes"
+    __table_args__ = (
+        Index('idx_vc_value_code', 'value', 'code'),
+    )
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    # Ссылка на канал (phone или email) – внешний ключ на Channel.id
+    channel_id = Column(Integer, ForeignKey("channels.id", ondelete="CASCADE"), nullable=False)
+    value = Column(String(255), nullable=False)  # телефон или email
+    code = Column(String(6), nullable=False)
+    type = Column(Enum(VerificationType), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Boolean, default=False)
+
+    user = relationship("User", back_populates="verification_codes")
+    channel = relationship("Channel", back_populates="verification_codes")
+    
+class Feedback(Base, CreateUpdate):
+    __tablename__ = "feedbacks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=True)   # может быть NULL
+    phone = Column(String(20), nullable=True)   # добавили телефон
+    email = Column(String(100), nullable=False)  # сделаем обязательным
+    topic = Column(String(50), nullable=True)
+    message = Column(Text, nullable=False)
+    page_url = Column(String(255), nullable=True)
+    user_agent = Column(String(255), nullable=True)
+    
+class OrderStatus(str, enum.Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+class Order(Base, CreateUpdate):
+    __tablename__ = "orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    uuid = Column(SA_UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    sender_phone = Column(String(20), nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    status = Column(Enum(OrderStatus), default=OrderStatus.PENDING)
+    channels = Column(ARRAY(String), nullable=False, default=[])  # массив каналов: ['sms', 'email', 'telegram', ...]
+    total_recipients = Column(Integer, default=0)
+    text_preview = Column(String(1000), nullable=True)
+
+    user = relationship("User", back_populates="orders")
+    messages = relationship("Message", back_populates="order", cascade="all, delete-orphan")
+    
+class Document(Base, CreateUpdate, IdentifierMixin):
+    __tablename__ = "documents"
+
+    doc_type = Column(Enum(DocumentType), nullable=False)
+    version = Column(String(20), nullable=False)
+    title = Column(String(200), nullable=True)
+    content = Column(Text, nullable=False)  # HTML или Markdown
+    effective_date = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, default=False, nullable=False)
+
+    __table_args__ = (
+        # Уникальность: не может быть двух активных версий одного типа
+        # (но это можно обрабатывать на уровне приложения)
+        # Уникальность версии для типа
+        UniqueConstraint('doc_type', 'version', name='uq_doc_version'),
+    )
+    
+class UserConsentDocument(Base, CreateUpdate, IdentifierMixin):
+    __tablename__ = "user_consent_documents"
+
+    phone = Column(String(20), nullable=False, index=True)  # телефон пользователя (может быть и не зарегистрирован)
+    terms_version_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
+    privacy_version_id = Column(Integer, ForeignKey("documents.id"), nullable=False)
+    verification_code_id = Column(Integer, ForeignKey("verification_codes.id"), nullable=True)
+    confirmed_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    # Связи (опционально)
+    terms_version = relationship("Document", foreign_keys=[terms_version_id])
+    privacy_version = relationship("Document", foreign_keys=[privacy_version_id])
+    verification_code = relationship("VerificationCode")
+
+    __table_args__ = (
+        # Уникальность: один пользователь может принять только одну запись согласия (самую новую)
+        # Но мы можем хранить историю, тогда уникальность не нужна.
+        # Для простоты сделаем индекс для поиска последнего согласия по телефону.
+        Index('idx_user_consent_phone', 'phone'),
+        # Или можно сделать UniqueConstraint, если хотим, чтобы каждый пользователь имел только одну запись.
+        # UniqueConstraint('phone', name='uq_user_consent_phone'),
+    )

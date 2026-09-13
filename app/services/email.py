@@ -1,7 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from app.core.config import settings
+from app.config.config import settings
 
 def send_feedback_email(name: str, email: str, subject: str, message: str) -> bool:
     """

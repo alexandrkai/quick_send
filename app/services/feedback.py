@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from app.crud.feedback import feedback
-from app.schemas.feedback import FeedbackCreate
-from app.models.models import Feedback
+from app.crud.feedback import crud_feedback
+from app.schemas import FeedbackCreate
+from app.models import Feedback
 
 
 class FeedbackService:
@@ -9,4 +9,4 @@ class FeedbackService:
         self.db = db
 
     def create_feedback(self, data: FeedbackCreate) -> Feedback:
-        return feedback.create(self.db, obj_in=data)
+        return crud_feedback.create(self.db, obj_in=data)

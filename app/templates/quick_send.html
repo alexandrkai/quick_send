@@ -1,898 +1,535 @@
-<!DOCTYPE html>
-<html lang="ru">
+{% extends "base.html" %}
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="keywords" content="отправка, смс, email, быстро, форма, контакты, список, верификация, условия, политика">
-	<meta name="description" content="Быстрая отправка сообщений на список контактов через СМС и Email. Требуется верификация телефона и обязательное ознакомление с условиями.">
-    <meta property="og:site_name" content="MSGPRO">
-    <meta property="og:url" content="https://msgpro.ru">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="MSGPRO - Быстрая отправка">
-	<meta name='og:image' content='images/assets/ogg.png'>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="theme-color" content="#0D1A1C">
-	<meta name="msapplication-navbutton-color" content="#0D1A1C">
-	<meta name="apple-mobile-web-app-status-bar-style" content="#0D1A1C">
-	<title>MSGPRO - Быстрая отправка</title>
-	<!-- Favicon -->
-	<link rel="icon" type="image/png" sizes="56x56" href="static/images/fav-icon/icon.png">
-	<!-- Bootstrap CSS -->
-	<link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" media="all">
-	<!-- Main style sheet -->
-	<link rel="stylesheet" type="text/css" href="static/css/style.min.css" media="all">
-	<!-- responsive style sheet -->
-	<link rel="stylesheet" type="text/css" href="static/css/responsive.css" media="all">
-	<!-- Bootstrap Icons -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-</head>
+{% block title %}MSGPRO - Быстрая отправка{% endblock %}
+{% block keywords %}отправка, смс, email, бесплатно, форма{% endblock %}
+{% block description %}Быстрая отправка СМС и Email сообщений.{% endblock %}
 
-<body>
-	<div class="main-page-wrapper">
-		<!-- Preloader -->
-		<div id="preloader">
-			<div id="ctn-preloader" class="ctn-preloader">
-				<div class="icon"><img src="static/images/loader.svg" alt="" class="m-auto d-block"> <span></span></div>
-				<div class="txt-loading">
-					<span data-text-preloader="M" class="letters-loading">M</span>
-					<span data-text-preloader="S" class="letters-loading">S</span>
-					<span data-text-preloader="G" class="letters-loading">G</span>
-					<span data-text-preloader="P" class="letters-loading">P</span>
-					<span data-text-preloader="R" class="letters-loading">R</span>
-					<span data-text-preloader="O" class="letters-loading">O</span>
-				</div>
-			</div>
-		</div>
+{% block content %}
+<div class="inner-banner-two bg-one border-30 z-1 pt-100 lg-pt-60 pb-90 lg-pb-50 mt-30 lg-mt-20 position-relative">
+    <div class="container">
+        <div class="title-one text-center">
+            <h2>Быстрая отправка</h2>
+        </div>
+    </div>
+    <img src="/static/images/shape/shape_89.svg" alt="" class="shapes shape_01">
+</div>
 
-		<!-- Header -->
-		<header class="theme-main-menu menu-style-ten sticky-menu menu-overlay">
-			<div class="inner-content gap-one">
-				<div class="top-header position-relative">
-					<div class="d-flex align-items-center justify-content-between">
-						<div class="logo order-lg-0">
-							<a href="index.html" class="d-flex align-items-center">
-								<img src="static/images/logo/logo_09.svg" alt="">
-							</a>
-						</div>
-                        <div class="order-lg-2 ms-5 d-none d-md-inline-block">
-                            <p class="m0 fs-20 font-manrope fw-500">Звонок <a href="#" class="fw-600 text-dark">+7 (495) 123-45-67</a></p>
+<div class="block-feature-one border-30 bg-three mt-30 lg-mt-20 pt-100 lg-pt-60 pb-120 lg-pb-70">
+    <div class="container">
+        <div class="wrapper m-auto" style="max-width: 860px;">
+            <div class="card border-0 shadow-sm p-4 p-lg-5 rounded-4 bg-white">
+
+                <form id="quickSendForm" onsubmit="event.preventDefault(); startVerificationFlow();">
+                    <!-- Текст сообщения -->
+                    <div class="mb-4">
+                        <label for="msgText" class="form-label fw-bold">Текст сообщения</label>
+                        <textarea name="text" id="msgText" class="form-control" rows="5"
+                            placeholder="Введите текст сообщения..." required oninput="checkLength()"></textarea>
+                        <div class="d-flex justify-content-between mt-2">
+                            <div id="lengthStatus" class="small text-muted">0 / 500</div>
+                            <div id="limitAlert" class="small text-danger fw-bold"></div>
                         </div>
-						<div class="right-widget order-lg-3 ms-auto me-3 me-lg-0">
-							<ul class="d-flex align-items-center style-none">
-                                <!-- <li>
-                                    <div class="dropdown language-dropdown me-4">
-                                        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                          <img src="static/images/icon/icon_60.svg" alt="" class="d-inline-block"> RU
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">English</a></li>
-                                        </ul>
-                                    </div>
-                                </li> -->
-                                <li>
-                                    <div class="dropdown search-dropdown me-sm-4 border-end pe-3">
-                                        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                          <img src="static/images/icon/icon_61.svg" alt="">
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li>
-                                                <form action="#">
-                                                    <input type="text" placeholder="Поиск.....">
-                                                    <button><img src="static/images/icon/icon_61.svg" alt="" class="m-auto"></button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-								<!-- <li class="d-none d-sm-inline-block">
-									<a href="#" class="login-btn-one fw-500 d-flex align-items-center tran3s"><img src="static/images/icon/icon_18.svg" alt="" class="me-2"> <span>Мой аккаунт</span></a>
-                                </li> -->
-							</ul>
-						</div>
-						<nav class="navbar navbar-expand-lg p0 order-lg-2 ms-lg-auto">
-							<button class="navbar-toggler d-block d-lg-none" type="button" data-bs-toggle="collapse"
-								data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-								aria-label="Toggle navigation">
-								<span></span>
-							</button>
-							<div class="collapse navbar-collapse" id="navbarNav">
-								<ul class="navbar-nav align-items-lg-center">
-									<li class="nav-item"><a class="nav-link" href="index.html">Главная</a></li>
-									<li class="nav-item dropdown">
-										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-											data-bs-auto-close="outside" aria-expanded="false">Сервисы
-										</a>
-										<ul class="dropdown-menu">
-											<li><a href="quick_send.html" class="dropdown-item"><span>Быстрая отправка</span></a></li>
-											<li><a href="prohibit.html" class="dropdown-item"><span>Запрет рассылки</span></a></li>
-											<li><a href="allow.html" class="dropdown-item"><span>Разрешение рассылки</span></a></li>
-										</ul>
-									</li>
-									<li class="nav-item dropdown">
-										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-											data-bs-auto-close="outside" aria-expanded="false">Правила сервиса
-										</a>
-										<ul class="dropdown-menu">
-											<li><a href="terms.html" class="dropdown-item"><span>Условия использования</span></a></li>
-											<li><a href="privacy.html" class="dropdown-item"><span>Политика конфиденциальности</span></a></li>
-										</ul>
-									</li>
-									<li class="nav-item dropdown">
-										<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-											data-bs-auto-close="outside" aria-expanded="false">Информация о нас
-										</a>
-										<ul class="dropdown-menu">
-											<li><a href="about.html" class="dropdown-item"><span>О нас</span></a></li>
-											<li><a href="contact.html" class="dropdown-item"><span>Контакт</span></a></li>
-										</ul>
-									</li>
-								</ul>
-							</div>
-						</nav>
-					</div>
-				</div>
-			</div>
-		</header>
+                    </div>
 
-		<!-- Inner Banner -->
-		<div class="inner-banner-one z-1 position-relative gap-40 mt-120 lg-mt-100">
-			<div class="bg position-relative z-1 pt-120 xl-pt-100 lg-pt-80 pb-130 xl-pb-100 lg-pb-70">
-                <div class="container">
-                    <h2>Быстрая отправка</h2>
-                    <ul class="style-none d-flex align-items-center">
-                        <li><a href="index.html">Главная</a></li>
-                        <li>/</li>
-                        <li>Быстрая отправка</li>
-                    </ul>
-                </div>
+                    <hr class="my-4">
+
+                    <!-- Получатели -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Добавить получателя (до 10 контактов в час)</label>
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <input type="tel" id="contactPhone" class="form-control"
+                                    placeholder="Телефон (+79990000000)">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="email" id="contactEmail" class="form-control"
+                                    placeholder="Email (user@example.com)">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" id="btnAddContact" class="btn-two w-100 py-2" onclick="addContact()">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="contactError" class="text-danger small mt-1 d-none">Укажите телефон или email</div>
+                    </div>
+
+                    <!-- Таблица получателей -->
+                    <div class="mb-4">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle" id="contactsTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Телефон</th>
+                                        <th>Email</th>
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contactsTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="emptyContacts" class="text-muted small">Список получателей пуст.  Добавьте контакты.</div>
+                    </div>
+
+                    <div id="formMsg" class="alert d-none mb-3" role="alert"></div>
+
+                    <button type="submit" class="btn-one w-100 text-center py-3" id="mainSubmitBtn">
+                        Отправить сообщение
+                    </button>
+                </form>
+
             </div>
-		</div>
+        </div>
+    </div>
+</div>
 
-        <!-- Service Details -->
-		<div class="service-details mt-150 xl-mt-120 lg-mt-80">
-			<div class="container">
-                <div class="wrapper m-auto" style="max-width: 820px;">
-                    <div class="row">
-                        <div class="col-xl-8 m-auto text-center">
-                            <div class="title-ten mb-60 lg-mb-30">
-                                <h2>Отправьте сообщение на список контактов</h2>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card border-0 shadow-sm p-4 p-lg-5">
-                                <form id="quickForm" onsubmit="event.preventDefault(); sendMessage();">
-
-                                    <!-- Верификация телефона -->
-                                    <div class="mb-4 p-3 bg-light border rounded">
-                                        <h6 class="fw-bold">Для отправки необходимо подтвердить ваш телефон</h6>
-                                        <div class="row g-2 align-items-end">
-                                            <div class="col-md-5">
-                                                <label class="form-label small">Номер телефона</label>
-                                                <input type="tel" id="verifyPhone" class="form-control" placeholder="+7 (999) 000-00-00" value="">
-                                            </div>
-                                            <div class="col-md-3">
-                                                <button type="button" class="btn btn-outline-secondary w-100" id="requestCodeBtn" onclick="requestSmsCode()">
-                                                    <span id="reqCodeText">Получить код</span>
-                                                    <div id="reqCodeSpinner" class="spinner-border spinner-border-sm d-none"></div>
-                                                </button>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <input type="text" id="verifyCode" class="form-control" placeholder="Код из SMS" maxlength="6">
-                                            </div>
-                                            <div class="col-md-1">
-                                                <button type="button" class="btn btn-success w-100" id="verifyBtn" onclick="verifySmsCode()">
-                                                    <i class="bi bi-check-lg"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div id="verifyStatus" class="small mt-2"></div>
-                                        <div id="verifyError" class="text-danger small mt-1 d-none"></div>
-                                    </div>
-
-                                    <!-- Каналы -->
-                                    <!-- <div class="mb-4 p-3 bg-light border rounded">
-                                        <label class="form-label fw-bold mb-2">Каналы отправки (выберите один или несколько)</label>
-                                        <div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input channel-checkbox" type="checkbox" value="Телефон" id="ch_phone" checked>
-                                                <label class="form-check-label" for="ch_phone"><i class="bi bi-phone"></i> SMS</label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input channel-checkbox" type="checkbox" value="Email" id="ch_email">
-                                                <label class="form-check-label" for="ch_email"><i class="bi bi-envelope-fill text-warning"></i> Email</label>
-                                            </div>
-                                        </div>
-                                        <div id="channelError" class="text-danger small mt-1 d-none">Выберите хотя бы один канал</div>
-                                    </div> -->
-
-                                    <!-- Текст сообщения -->
-                                    <div class="mb-4">
-                                        <label for="msgText" class="form-label fw-bold">Текст сообщения</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">
-                                                <i class="bi bi-chat-text"></i>
-                                            </span>
-                                            <textarea name="text" id="msgText" class="form-control" rows="5" placeholder="Введите текст сообщения..." required oninput="checkLength()"></textarea>
-                                        </div>
-                                        <div class="d-flex justify-content-between mt-2">
-                                            <div id="lengthStatus" class="small text-muted">0 / 500</div>
-                                            <div id="limitAlert" class="small text-danger fw-bold"></div>
-                                        </div>
-                                    </div>
-
-                                    <hr class="my-4">
-
-                                    <!-- Добавление контактов -->
-                                    <div class="mb-4">
-                                        <label class="form-label fw-bold">Добавить получателя</label>
-                                        <div class="row g-2">
-                                            <div class="col-md-5">
-                                                <input type="tel" id="contactPhone" class="form-control" placeholder="Телефон (например, +71234567890)">
-                                            </div>
-                                            <div class="col-md-5">
-                                                <input type="email" id="contactEmail" class="form-control" placeholder="Email (например, user@example.ru)">
-                                            </div>
-                                            <div class="col-md-2">
-                                                <button type="button" class="btn btn-outline-primary w-100" onclick="addContact()">
-                                                    <i class="bi bi-plus-lg"></i> Добавить
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div id="contactError" class="text-danger small mt-1 d-none">Укажите хотя бы телефон или email</div>
-                                    </div>
-
-                                    <!-- Список контактов -->
-                                    <div id="contactsListContainer" class="mb-4">
-                                        <label class="form-label fw-bold">Список получателей</label>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-hover" id="contactsTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Телефон</th>
-                                                        <th>Email</th>
-                                                        <th style="width: 60px;">Действие</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="contactsTableBody"></tbody>
-                                            </table>
-                                        </div>
-                                        <div id="emptyContacts" class="text-muted small">Список пуст. Добавьте хотя бы один контакт.</div>
-                                    </div>
-
-                                    <!-- Чекбокс согласия (заблокирован) -->
-                                    <div class="mb-4 form-check">
-                                        <input type="checkbox" class="form-check-input" id="termsCheckbox" disabled>
-                                        <label class="form-check-label small" for="termsCheckbox">
-                                            Я принимаю <b><a href="javascript:void(0)" id="termsLink" onclick="openTermsModal()">Условия использования</a></b> и <b><a href="javascript:void(0)" id="privacyLink" onclick="openTermsModal()">Политику конфиденциальности</a></b>
-                                            <span class="text-danger">*</span>
-                                        </label>
-                                        <div id="termsError" class="text-danger small d-none">Необходимо согласиться с условиями</div>
-                                    </div>
-
-                                    <!-- Кнопка отправки -->
-                                    <button type="submit" class="btn-four w-100 tran3s d-block mt-20" id="sendBtn" disabled>
-                                        <i class="bi bi-send-fill"></i> Отправить сообщение
-                                    </button>
-                                    
-                                    <div id="form-msg" class="alert d-none mt-3 mb-0 p-2" role="alert"></div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+<!-- МОДАЛЬНОЕ ОКНО 1: Ввод телефона -->
+<div class="modal fade" id="phoneModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-30 p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Ваш номер телефона</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Укажите ваш номер телефона для авторизации отправки:</p>
+                <div class="mb-3">
+                    <input type="tel" id="senderPhone" class="form-control" placeholder="+79990000000">
                 </div>
-			</div>
-		</div>
+                <div id="phoneModalError" class="alert alert-danger d-none p-2 small"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn-one w-100" id="btnCheckPhone" onclick="handlePhoneSubmit()">
+                    Продолжить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ОЗНАКОМЛЕНИЯ С УСЛОВИЯМИ -->
-		<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-			<div class="modal-dialog modal-lg modal-dialog-centered">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title" id="termsModalLabel">Ознакомьтесь с документами</h5>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<!-- Вкладки -->
-						<ul class="nav nav-tabs" id="termsTabs" role="tablist">
-							<li class="nav-item" role="presentation">
-								<button class="nav-link active" id="terms-tab" data-bs-toggle="tab" data-bs-target="#termsContent" type="button" role="tab" aria-controls="termsContent" aria-selected="true">Условия использования</button>
-							</li>
-							<li class="nav-item" role="presentation">
-								<button class="nav-link" id="privacy-tab" data-bs-toggle="tab" data-bs-target="#privacyContent" type="button" role="tab" aria-controls="privacyContent" aria-selected="false">Политика конфиденциальности</button>
-							</li>
-						</ul>
-						<div class="tab-content mt-3" id="termsTabsContent">
-							<!-- Условия -->
-							<div class="tab-pane fade show active" id="termsContent" role="tabpanel" aria-labelledby="terms-tab">
-								<div class="terms-scroll" id="termsScroll" style="max-height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px;">
-									<h6>1. Общие положения</h6>
-									<p>Настоящие Условия использования регулируют порядок использования Сервиса MSGPRO.RU...</p>
-									<p>... (длинный текст, чтобы была прокрутка) ...</p>
-									<p>2. Обязанности пользователя</p>
-									<p>Пользователь обязуется не нарушать законодательство РФ...</p>
-									<p>3. Ответственность сторон</p>
-									<p>Сервис предоставляется "как есть" без гарантий...</p>
-									<p>4. Заключительные положения</p>
-									<p>Настоящие Условия вступают в силу с момента их принятия...</p>
-									<p>Для целей прокрутки добавьте достаточное количество текста. Это пример.</p>
-									<p>Ещё абзац для полноты...</p>
-									<p>Последний абзац, чтобы была прокрутка.</p>
-								</div>
-								<div class="mt-2 d-flex justify-content-between align-items-center">
-									<span class="small text-muted">Прокрутите до конца, чтобы подтвердить</span>
-									<button class="btn btn-outline-primary btn-sm" id="termsReadBtn" disabled>Я ознакомился</button>
-								</div>
-							</div>
-							<!-- Политика -->
-							<div class="tab-pane fade" id="privacyContent" role="tabpanel" aria-labelledby="privacy-tab">
-								<div class="terms-scroll" id="privacyScroll" style="max-height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #dee2e6; border-radius: 4px;">
-									<h6>Политика конфиденциальности</h6>
-									<p>Мы собираем минимальный объем данных для работы Сервиса...</p>
-									<p>... (длинный текст для прокрутки) ...</p>
-									<p>Какие данные мы собираем:</p>
-									<ul>
-										<li>Номер телефона (только для верификации)</li>
-										<li>Email (если вы его указываете)</li>
-										<li>Текст сообщений (не сохраняются после отправки)</li>
-									</ul>
-									<p>Мы не передаём данные третьим лицам...</p>
-									<p>Использование файлов cookie...</p>
-									<p>Ваши права...</p>
-									<p>Ещё текст для прокрутки...</p>
-									<p>Заключительные положения...</p>
-								</div>
-								<div class="mt-2 d-flex justify-content-between align-items-center">
-									<span class="small text-muted">Прокрутите до конца, чтобы подтвердить</span>
-									<button class="btn btn-outline-primary btn-sm" id="privacyReadBtn" disabled>Я ознакомился</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-						<button type="button" class="btn btn-primary" id="acceptAllBtn" disabled>Принимаю</button>
-					</div>
-				</div>
-			</div>
-		</div>
-
-        <!-- FAQ -->
-		<div class="faq-section-three bg-grey gap-40 mt-160 xl-mt-120 lg-mt-70">
-			<div class="bg-wrapper pt-120 lg-pt-80 pb-120 lg-pb-80">
-                <div class="container">
-                    <div class="title-ten text-center mb-60 lg-mb-30">
-                        <h2>Часто задаваемые вопросы</h2>
+<!-- МОДАЛЬНОЕ ОКНО 2: Ознакомление и принятие документов -->
+<div class="modal fade" id="termsModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-30 p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Принятие условий и политики</h5>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning small py-2 mb-3">
+                    Перед отправкой СМС-кода подтверждения необходимо ознакомиться и принять документы сервиса.
+                </div>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="tabTermsBtn" data-bs-toggle="tab"
+                            data-bs-target="#tabTerms">Условия использования</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="tabPrivacyBtn" data-bs-toggle="tab"
+                            data-bs-target="#tabPrivacy">Политика конфиденциальности</button>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="tabTerms">
+                        <div id="termsScrollBox"
+                            style="max-height: 240px; overflow-y: auto; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        </div>
+                        <div class="mt-2 text-end">
+                            <button class="btn btn-sm btn-outline-success" id="termsCheckBtn" disabled
+                                onclick="markDocumentRead('terms')">Ознакомлен</button>
+                        </div>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-10 m-auto">
-                            <div class="accordion accordion-style-six" id="accordionFour">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOneA">
-                                            Зачем подтверждать телефон?
-                                        </button>
-                                      </h2>
-                                      <div id="collapseOneA" class="accordion-collapse collapse" data-bs-parent="#accordionFour">
-                                        <div class="accordion-body">
-                                            <p class="fs-22">Это необходимо для защиты от спама и подтверждения вашей личности. Мы не храним ваш номер, он используется только для отправки кода.</p>
-                                        </div>
-                                      </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwoA">
-                                            Есть ли ограничение на количество SMS?
-                                        </button>
-                                    </h2>
-                                    <div id="collapseTwoA" class="accordion-collapse collapse" data-bs-parent="#accordionFour">
-                                        <div class="accordion-body">
-                                            <p class="fs-22">Да, не более 10 SMS в час с одного аккаунта. Это сделано для защиты от спама.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThreeA">
-                                            Нужно ли регистрироваться?
-                                        </button>
-                                    </h2>
-                                    <div id="collapseThreeA" class="accordion-collapse collapse" data-bs-parent="#accordionFour">
-                                        <div class="accordion-body">
-                                            <p class="fs-22">Нет, регистрация не требуется. Достаточно подтвердить телефон и принять условия.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFourA">
-                                            Как я могу принять условия?
-                                        </button>
-                                    </h2>
-                                    <div id="collapseFourA" class="accordion-collapse collapse" data-bs-parent="#accordionFour">
-                                        <div class="accordion-body">
-                                            <p class="fs-22">Нажмите на ссылку «Условия использования» или «Политику конфиденциальности» под чекбоксом. Откроется модальное окно, где нужно прокрутить текст до конца в каждой вкладке и нажать «Я ознакомился» в обеих, затем «Принимаю».</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="tab-pane fade" id="tabPrivacy">
+                        <div id="privacyScrollBox"
+                            style="max-height: 240px; overflow-y: auto; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                        </div>
+                        <div class="mt-2 text-end">
+                            <button class="btn btn-sm btn-outline-success" id="privacyCheckBtn" disabled
+                                onclick="markDocumentRead('privacy')">Ознакомлен</button>
                         </div>
                     </div>
                 </div>
             </div>
-		</div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-one" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-one" id="acceptAllBtn" disabled onclick="onConsentsAccepted()">
+                    Я принимаю условия
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-		<!-- Footer -->
-		<div class="footer-three">
-			<div class="container">
-				<div class="position-relative">
-					<div class="row justify-content-between">
-						<div class="col-lg-2 order-lg-0">
-							<div class="logo mt-15 mb-30">
-								<a href="index.html"><img src="static/images/logo/logo_01.svg" alt=""></a>
-							</div> 
-						</div>
-						<div class="col-lg-2 col-6 order-lg-1">
-							<div class="footer-nav">
-								<ul class="footer-nav-link style-none">
-									<li><a href="about-us-v1.html">О нас</a></li>
-									<!-- <li><a href="project-v4.html">Портфолио</a></li>
-									<li><a href="pricing-v2.html">Цены</a></li>
-									<li><a href="blog-v2.html">Блог</a></li> -->
-									<li><a href="contact-v1.html">Контакты</a></li>
-								</ul>
-							</div>
-						</div>
-						<!-- <div class="col-lg-2 col-6 order-lg-3">
-							<div class="footer-nav">
-								<ul class="footer-nav-link style-none">
-									<li><a href="faq-v1.html">Тур</a></li>
-									<li><a href="faq-v1.html">Онлайн-чат</a></li>
-									<li><a href="contact-v1.html">Самообслуживание</a></li>
-									<li><a href="faq-v1.html">Соцсети</a></li>
-									<li><a href="faq-v1.html">Мобильное приложение</a></li>
-								</ul>
-							</div>
-						</div> -->
-						<div class="col-lg-2 col-6 order-lg-2">
-							<div class="footer-nav mb-20">
-								<ul class="footer-nav-link style-none">
-									<li><a href="faq-v1.html">FAQ</a></li>
-									<li><a href="faq-v2.html">Политика конфиденциальности</a></li>
-									<li><a href="faq-v1.html">Условия использования</a></li>
-								</ul>
-							</div>
-						</div>
-						<!-- <div class="col-lg-2 col-6 order-lg-4">
-							<div class="footer-nav mb-20">
-								<ul class="footer-nav-link style-none">
-									<li><a href="faq-v1.html">Помощь</a></li>
-									<li><a href="faq-v2.html">Чат</a></li>
-									<li><a href="faq-v1.html">Разработчикам</a></li>
-								</ul>
-							</div>
-						</div> -->
-					</div>
-				</div>
-			</div>
-			<div class="container">
-				<div class="bottom-footer border-dark">
-					<div class="d-md-flex align-items-center justify-content-between">
-						<div class="d-flex justify-content-center align-items-center sm-mb-20">
-							<!-- <ul class="style-none d-flex justify-content-center">
-								<li><a href="faq-v2.html">Демо .</a></li>
-								<li><a href="faq-v2.html">Партнёры .</a></li>
-								<li><a href="blog-v2.html">Вакансии</a></li>
-							</ul> -->
-						</div>
-						<p class="copyright-text text-center m0"><span>@2026 MSGPRO.RU</span> Все права защищены</p>
-					</div>
-				</div>
-			</div>
-		</div>
+<!-- МОДАЛЬНОЕ ОКНО 3: Ввод SMS-кода -->
+<div class="modal fade" id="smsCodeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-30 p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Подтверждение кодом</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="small text-muted mb-2" id="smsTargetPhoneInfo"></div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">6-значный код из SMS</label>
+                    <input type="text" id="smsCodeInput" class="form-control text-center fs-4" maxlength="6"
+                        placeholder="000000">
+                </div>
+                <div id="smsModalStatus" class="alert d-none p-2 small"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn-one w-100" id="btnVerifyAndFinish" onclick="verifyAndSendMessages()">
+                    Подтвердить и отправить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-		<button class="scroll-top">
-			<i class="bi bi-arrow-up-short"></i>
-		</button>
+{% block extra_scripts %}
+<script>
+    let contacts = [];
+    let senderPhone = '';
+    let hasAcceptedConsentsInFlow = false;
+    let readTerms = false;
+    let readPrivacy = false;
 
-		<!-- JavaScript -->
-		<script src="static/vendor/jquery.min.js"></script>
-		<script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-		<script src="static/vendor/wow/wow.min.js"></script>
-		<script src="static/vendor/slick/slick.min.js"></script>
-		<script src="static/vendor/fancybox/fancybox.umd.js"></script>
-		<script src="static/vendor/jquery.lazy.min.js"></script>
-		<script src="static/vendor/jquery.counterup.min.js"></script>
-		<script src="static/vendor/jquery.waypoints.min.js"></script>
-		<script src="static/vendor/validator.js"></script>
-		<script src="static/js/theme.js"></script>
+    // --- Валидация длины текста ---
+    function checkLength() {
+        const text = document.getElementById('msgText').value;
+        const limit = 500;
+        const lenDiv = document.getElementById('lengthStatus');
+        const errDiv = document.getElementById('limitAlert');
+        lenDiv.textContent = `${text.length} / ${limit}`;
+        if (text.length > limit) {
+            errDiv.textContent = `Лимит превышен на ${text.length - limit}`;
+            lenDiv.classList.add('text-danger');
+            document.getElementById('mainSubmitBtn').disabled = true;
+        } else {
+            errDiv.textContent = '';
+            lenDiv.classList.remove('text-danger');
+            document.getElementById('mainSubmitBtn').disabled = false;
+        }
+    }
 
-		<!-- Основной скрипт -->
-		<script>
-			// --- Состояние ---
-			let contacts = [];
-			let isPhoneVerified = false;
-			let verifiedPhone = '';
-			let termsAccepted = false;
+    // --- Проверка запрета рассылки по API ---
+    async function checkContactPermission(channel, value) {
+        const res = await fetch(`/api/v1/permission_prohibition/check-recipient?channel=${encodeURIComponent(channel)}&value=${encodeURIComponent(value)}`);
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Ошибка валидации получателя');
+        }
+        return await res.json();
+    }
 
-			// Флаги для ознакомления
-			let termsReadFlag = false;
-			let privacyReadFlag = false;
+    // --- Добавление контактов с валидацией запретов ---
+    async function addContact() {
+        if (contacts.length >= 10) {
+            alert('Лимит: не более 10 получателей в час.');
+            return;
+        }
 
-			// --- Верификация ---
-			async function requestSmsCode() {
-				const phone = document.getElementById('verifyPhone').value.trim();
-				const statusDiv = document.getElementById('verifyStatus');
-				const errorDiv = document.getElementById('verifyError');
-				const btn = document.getElementById('requestCodeBtn');
-				const btnText = document.getElementById('reqCodeText');
-				const spinner = document.getElementById('reqCodeSpinner');
+        const phoneInput = document.getElementById('contactPhone');
+        const emailInput = document.getElementById('contactEmail');
+        const err = document.getElementById('contactError');
+        const btnAdd = document.getElementById('btnAddContact');
 
-				if (!phone) {
-					errorDiv.textContent = 'Введите номер телефона';
-					errorDiv.classList.remove('d-none');
-					return;
-				}
-				errorDiv.classList.add('d-none');
-				statusDiv.innerHTML = '';
+        let rawPhone = phoneInput.value.trim();
+        let normalizedPhone = rawPhone.replace(/[\s\(\)\-]/g, '');
 
-				btnText.textContent = 'Отправка...';
-				spinner.classList.remove('d-none');
-				btn.disabled = true;
+        if (normalizedPhone.startsWith('8') && normalizedPhone.length === 11) {
+            normalizedPhone = '+7' + normalizedPhone.slice(1);
+        }
 
-				try {
-					const formData = new FormData();
-					formData.append('phone', phone);
-					const response = await fetch('/api/auth/request-sms', {
-						method: 'POST',
-						body: formData
-					});
-					const data = await response.json();
-					if (response.ok && data.status === 'ok') {
-						statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle"></i> ${data.data || 'Код отправлен'}</span>`;
-						showToast('Код отправлен', 'success');
-					} else {
-						errorDiv.textContent = data.detail || 'Ошибка отправки';
-						errorDiv.classList.remove('d-none');
-						showToast('Ошибка отправки кода', 'danger');
-					}
-				} catch (e) {
-					errorDiv.textContent = 'Ошибка соединения';
-					errorDiv.classList.remove('d-none');
-					showToast('Ошибка сети', 'danger');
-				} finally {
-					btnText.textContent = 'Получить код';
-					spinner.classList.add('d-none');
-					btn.disabled = false;
-				}
-			}
+        const email = emailInput.value.trim().toLowerCase();
 
-			async function verifySmsCode() {
-				const phone = document.getElementById('verifyPhone').value.trim();
-				const code = document.getElementById('verifyCode').value.trim();
-				const statusDiv = document.getElementById('verifyStatus');
-				const errorDiv = document.getElementById('verifyError');
-				const verifyBtn = document.getElementById('verifyBtn');
+        // 1. Проверка заполнения
+        if (!normalizedPhone && !email) {
+            err.textContent = 'Укажите номер телефона или email';
+            err.classList.remove('d-none');
+            return;
+        }
 
-				if (!phone || !code) {
-					errorDiv.textContent = 'Введите телефон и код';
-					errorDiv.classList.remove('d-none');
-					return;
-				}
-				errorDiv.classList.add('d-none');
-				statusDiv.innerHTML = 'Проверка...';
-				verifyBtn.disabled = true;
+        // 2. Валидация телефона
+        const phoneRegex = /^\+7\d{10}$/;
+        if (normalizedPhone && !phoneRegex.test(normalizedPhone)) {
+            err.textContent = 'Неверный формат телефона. Пример: +79991234567';
+            err.classList.remove('d-none');
+            return;
+        }
 
-				try {
-					const formData = new FormData();
-					formData.append('phone', phone);
-					formData.append('code', code);
-					const response = await fetch('/api/auth/verify-sms', {
-						method: 'POST',
-						body: formData
-					});
-					if (response.ok) {
-						isPhoneVerified = true;
-						verifiedPhone = phone;
-						statusDiv.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Телефон подтверждён</span>`;
-						showToast('Телефон подтверждён', 'success');
-						document.getElementById('verifyPhone').disabled = true;
-						document.getElementById('verifyCode').disabled = true;
-						document.getElementById('requestCodeBtn').disabled = true;
-						verifyBtn.disabled = true;
-						checkSendAvailability();
-					} else {
-						const data = await response.json();
-						errorDiv.textContent = data.detail || 'Неверный код';
-						errorDiv.classList.remove('d-none');
-						showToast('Неверный код', 'danger');
-						verifyBtn.disabled = false;
-					}
-				} catch (e) {
-					errorDiv.textContent = 'Ошибка проверки';
-					errorDiv.classList.remove('d-none');
-					showToast('Ошибка', 'danger');
-					verifyBtn.disabled = false;
-				}
-			}
+        // 3. Валидация Email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email && !emailRegex.test(email)) {
+            err.textContent = 'Неверный формат email. Пример: user@mail.ru';
+            err.classList.remove('d-none');
+            return;
+        }
 
-			// --- Управление кнопкой отправки ---
-			function checkSendAvailability() {
-				const sendBtn = document.getElementById('sendBtn');
-				if (isPhoneVerified && termsAccepted) {
-					sendBtn.disabled = false;
-				} else {
-					sendBtn.disabled = true;
-				}
-			}
+        // 4. Проверка на дубликаты в текущей таблице
+        const isDuplicate = contacts.some(c => {
+            const phoneExists = normalizedPhone && c.phone && (c.phone === normalizedPhone);
+            const emailExists = email && c.email && (c.email === email);
+            return Boolean(phoneExists || emailExists);
+        });
 
-			// --- Работа с модальным окном ---
-			function openTermsModal() {
-				const modal = new bootstrap.Modal(document.getElementById('termsModal'));
-				modal.show();
-				// Сбрасываем состояние при открытии
-				termsAccepted = false;
-				termsReadFlag = false;
-				privacyReadFlag = false;
-				document.getElementById('termsCheckbox').checked = false;
-				document.getElementById('termsCheckbox').disabled = true;
-				document.getElementById('termsReadBtn').disabled = true;
-				document.getElementById('privacyReadBtn').disabled = true;
-				document.getElementById('acceptAllBtn').disabled = true;
-				document.getElementById('termsScroll').scrollTop = 0;
-				document.getElementById('privacyScroll').scrollTop = 0;
-				// Активируем первую вкладку
-				document.querySelector('#terms-tab').click();
-			}
+        if (isDuplicate) {
+            err.textContent = 'Этот контакт уже присутствует в списке';
+            err.classList.remove('d-none');
+            return;
+        }
 
-			// Отслеживание прокрутки
-			document.getElementById('termsScroll').addEventListener('scroll', function() {
-				const scrollTop = this.scrollTop;
-				const scrollHeight = this.scrollHeight - this.clientHeight;
-				if (scrollTop >= scrollHeight - 2) {
-					document.getElementById('termsReadBtn').disabled = false;
-				} else {
-					document.getElementById('termsReadBtn').disabled = true;
-				}
-			});
+        // 5. Проверка наличия запрета на рассылку (BLOCKED)
+        btnAdd.disabled = true;
+        err.classList.add('d-none');
 
-			document.getElementById('privacyScroll').addEventListener('scroll', function() {
-				const scrollTop = this.scrollTop;
-				const scrollHeight = this.scrollHeight - this.clientHeight;
-				if (scrollTop >= scrollHeight - 2) {
-					document.getElementById('privacyReadBtn').disabled = false;
-				} else {
-					document.getElementById('privacyReadBtn').disabled = true;
-				}
-			});
+        try {
+            if (normalizedPhone) {
+                const phoneCheck = await checkContactPermission('phone', normalizedPhone);
+                if (!phoneCheck.allowed) {
+                    err.textContent = phoneCheck.message || 'Для данного номера телефона установлен запрет рассылки';
+                    err.classList.remove('d-none');
+                    return;
+                }
+            }
 
-			// Обработчики кнопок "Я ознакомился"
-			document.getElementById('termsReadBtn').addEventListener('click', function() {
-				termsReadFlag = true;
-				this.disabled = true; // блокируем
-				checkAcceptAll();
-			});
+            if (email) {
+                const emailCheck = await checkContactPermission('email', email);
+                if (!emailCheck.allowed) {
+                    err.textContent = emailCheck.message || 'Для данного email установлен запрет рассылки';
+                    err.classList.remove('d-none');
+                    return;
+                }
+            }
 
-			document.getElementById('privacyReadBtn').addEventListener('click', function() {
-				privacyReadFlag = true;
-				this.disabled = true;
-				checkAcceptAll();
-			});
+            // Добавление подтвержденного контакта
+            contacts.push({
+                phone: normalizedPhone || '',
+                email: email || ''
+            });
 
-			// Проверка готовности кнопки "Принимаю"
-			function checkAcceptAll() {
-				document.getElementById('acceptAllBtn').disabled = !(termsReadFlag && privacyReadFlag);
-			}
+            phoneInput.value = '';
+            emailInput.value = '';
+            renderContacts();
 
-			// Кнопка "Принимаю" — активирует чекбокс и закрывает модалку
-			document.getElementById('acceptAllBtn').addEventListener('click', function() {
-				termsAccepted = true;
-				document.getElementById('termsCheckbox').checked = true;
-				document.getElementById('termsCheckbox').disabled = false;
-				checkSendAvailability();
-				const modal = bootstrap.Modal.getInstance(document.getElementById('termsModal'));
-				modal.hide();
-				showToast('Вы приняли условия', 'success');
-			});
+        } catch (e) {
+            err.textContent = e.message || 'Не удалось проверить статус контакта. Попробуйте еще раз.';
+            err.classList.remove('d-none');
+        } finally {
+            btnAdd.disabled = false;
+        }
+    }
 
-			// Если пользователь снимает галочку вручную — сбрасываем флаг
-			document.getElementById('termsCheckbox').addEventListener('change', function() {
-				if (!this.checked) {
-					termsAccepted = false;
-					this.disabled = true;
-					showToast('Чтобы принять условия, нажмите на ссылку "Условия использования"', 'warning');
-					checkSendAvailability();
-				} else {
-					termsAccepted = true;
-					checkSendAvailability();
-				}
-			});
+    function removeContact(i) {
+        contacts.splice(i, 1);
+        renderContacts();
+    }
 
-			// При закрытии модалки без принятия — чекбокс заблокирован
-			document.getElementById('termsModal').addEventListener('hidden.bs.modal', function() {
-				if (!termsAccepted) {
-					document.getElementById('termsCheckbox').checked = false;
-					document.getElementById('termsCheckbox').disabled = true;
-					checkSendAvailability();
-				}
-			});
+    function renderContacts() {
+        const tbody = document.getElementById('contactsTableBody');
+        const empty = document.getElementById('emptyContacts');
+        if (contacts.length === 0) {
+            tbody.innerHTML = '';
+            empty.classList.remove('d-none');
+            return;
+        }
+        empty.classList.add('d-none');
+        tbody.innerHTML = contacts.map((c, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${c.phone || '—'}</td>
+                <td>${c.email || '—'}</td>
+                <td><button type="button" class="btn btn-sm text-danger border-0" onclick="removeContact(${i})"><i class="bi bi-x-lg"></i></button></td>
+            </tr>
+        `).join('');
+    }
 
-			// --- Контакты ---
-			function addContact() {
-				const phoneInput = document.getElementById('contactPhone');
-				const emailInput = document.getElementById('contactEmail');
-				const phone = phoneInput.value.trim();
-				const email = emailInput.value.trim();
-				const errorDiv = document.getElementById('contactError');
+    // --- Запуск верификации отправителя ---
+    function startVerificationFlow() {
+        const text = document.getElementById('msgText').value.trim();
+        if (!text) return;
+        if (contacts.length === 0) {
+            const err = document.getElementById('contactError');
+            err.textContent = 'Добавьте хотя бы одного получателя';
+            err.classList.remove('d-none');
+            return;
+        }
 
-				if (!phone && !email) {
-					errorDiv.classList.remove('d-none');
-					return;
-				}
-				errorDiv.classList.add('d-none');
-				contacts.push({ phone, email });
-				phoneInput.value = '';
-				emailInput.value = '';
-				renderContacts();
-			}
+        const savedPhone = localStorage.getItem('user_phone') || '';
+        if (savedPhone) document.getElementById('senderPhone').value = savedPhone;
 
-			function removeContact(index) {
-				contacts.splice(index, 1);
-				renderContacts();
-			}
+        new bootstrap.Modal(document.getElementById('phoneModal')).show();
+    }
 
-			function renderContacts() {
-				const tbody = document.getElementById('contactsTableBody');
-				const emptyDiv = document.getElementById('emptyContacts');
-				if (contacts.length === 0) {
-					tbody.innerHTML = '';
-					emptyDiv.classList.remove('d-none');
-					return;
-				}
-				emptyDiv.classList.add('d-none');
-				let html = '';
-				contacts.forEach((c, idx) => {
-					html += `
-						<tr>
-							<td>${idx + 1}</td>
-							<td>${c.phone || '-'}</td>
-							<td>${c.email || '-'}</td>
-							<td>
-								<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeContact(${idx})">
-									<i class="bi bi-trash"></i>
-								</button>
-							</td>
-						</tr>
-					`;
-				});
-				tbody.innerHTML = html;
-			}
+    async function handlePhoneSubmit() {
+        senderPhone = document.getElementById('senderPhone').value.trim();
+        const errBox = document.getElementById('phoneModalError');
 
-			// --- Валидация длины ---
-			function checkLength() {
-				const text = document.getElementById('msgText').value;
-				const limit = 500;
-				const lenDiv = document.getElementById('lengthStatus');
-				const errDiv = document.getElementById('limitAlert');
-				lenDiv.textContent = `${text.length} / ${limit}`;
-				if (text.length > limit) {
-					errDiv.textContent = `Превышен лимит на ${text.length - limit}`;
-					lenDiv.classList.add('text-danger');
-				} else {
-					errDiv.textContent = '';
-					lenDiv.classList.remove('text-danger');
-				}
-			}
+        if (!senderPhone.match(/^\+7\d{10}$/)) {
+            errBox.textContent = 'Укажите номер в формате +7XXXXXXXXXX';
+            errBox.classList.remove('d-none');
+            return;
+        }
+        errBox.classList.add('d-none');
 
-			// --- Отправка ---
-			async function sendMessage() {
-				const text = document.getElementById('msgText').value.trim();
-				const msgDiv = document.getElementById('form-msg');
-				const btn = document.getElementById('sendBtn');
-				const channelError = document.getElementById('channelError');
+        const btn = document.getElementById('btnCheckPhone');
+        btn.disabled = true;
+        btn.textContent = 'Проверка...';
 
-				const selectedChannels = Array.from(document.querySelectorAll('.channel-checkbox:checked'))
-					.map(cb => cb.value);
+        try {
+            const res = await fetch('/api/v1/auth/check-user-documents', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: senderPhone })
+            });
 
-				if (!text) {
-					showMsg('Введите текст сообщения', 'danger');
-					return;
-				}
-				if (selectedChannels.length === 0) {
-					channelError.classList.remove('d-none');
-					return;
-				} else {
-					channelError.classList.add('d-none');
-				}
-				if (contacts.length === 0) {
-					showMsg('Добавьте хотя бы один контакт', 'danger');
-					return;
-				}
-				if (!isPhoneVerified) {
-					showMsg('Сначала подтвердите телефон', 'danger');
-					return;
-				}
-				if (!termsAccepted) {
-					showMsg('Необходимо принять условия использования и политику конфиденциальности', 'danger');
-					return;
-				}
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.detail || 'Ошибка проверки документов');
+            }
 
-				const payload = {
-					text: text,
-					channels: selectedChannels,
-					contacts: contacts,
-					sender_phone: verifiedPhone,
-					terms_accepted: true
-				};
+            const data = await res.json();
 
-				const originalBtnText = btn.innerHTML;
-				btn.disabled = true;
-				btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
-				msgDiv.classList.add('d-none');
+            const phoneModalEl = document.getElementById('phoneModal');
+            const phoneModal = bootstrap.Modal.getInstance(phoneModalEl);
+            if (phoneModal) phoneModal.hide();
 
-				try {
-					const response = await fetch('/api/messages/bulk-send', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(payload)
-					});
-					const result = await response.json();
-					if (response.ok) {
-						showMsg('Сообщение успешно отправлено всем получателям!', 'success');
-						setTimeout(() => {
-							contacts = [];
-							renderContacts();
-							document.getElementById('msgText').value = '';
-							checkLength();
-							document.getElementById('termsCheckbox').checked = false;
-							document.getElementById('termsCheckbox').disabled = true;
-							termsAccepted = false;
-							btn.disabled = false;
-							btn.innerHTML = originalBtnText;
-							if (result.order_id) {
-								window.location.href = `/orders/${result.order_id}`;
-							}
-						}, 3000);
-					} else {
-						let errorMsg = result.detail || 'Ошибка отправки';
-						if (errorMsg.includes('лимит') || errorMsg.includes('limit')) {
-							errorMsg = 'Превышен лимит отправки SMS. Попробуйте позже.';
-						}
-						throw new Error(errorMsg);
-					}
-				} catch (error) {
-					console.error(error);
-					showMsg(error.message, 'danger');
-					btn.disabled = false;
-					btn.innerHTML = originalBtnText;
-				}
-			}
+            if (data.need_consent) {
+                openTermsModal(data.terms, data.privacy);
+            } else {
+                hasAcceptedConsentsInFlow = false;
+                triggerSmsDispatch();
+            }
+        } catch (e) {
+            errBox.textContent = e.message || 'Ошибка связи с сервером';
+            errBox.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Продолжить';
+        }
+    }
 
-			function showMsg(text, type) {
-				const msgDiv = document.getElementById('form-msg');
-				msgDiv.textContent = text;
-				msgDiv.className = `alert alert-${type} mt-3 mb-0 p-2`;
-				msgDiv.classList.remove('d-none');
-			}
+    function openTermsModal(terms, privacy) {
+        document.getElementById('termsScrollBox').innerHTML = terms.content;
+        document.getElementById('privacyScrollBox').innerHTML = privacy.content;
+        readTerms = false;
+        readPrivacy = false;
+        document.getElementById('acceptAllBtn').disabled = true;
 
-			function showToast(message, type) {
-				if (typeof window.showToast === 'function') {
-					window.showToast(message, type);
-				} else {
-					alert(message);
-				}
-			}
+        bindScrollListener('termsScrollBox', 'termsCheckBtn');
+        bindScrollListener('privacyScrollBox', 'privacyCheckBtn');
 
-			// Инициализация
-			renderContacts();
-			checkSendAvailability();
-		</script>
+        new bootstrap.Modal(document.getElementById('termsModal')).show();
+    }
 
-	</div>
-</body>
+    function bindScrollListener(boxId, btnId) {
+        const b = document.getElementById(boxId);
+        const btn = document.getElementById(btnId);
+        btn.disabled = true;
+        b.onscroll = function () {
+            if (b.scrollTop >= b.scrollHeight - b.clientHeight - 5) {
+                btn.disabled = false;
+            }
+        };
+    }
 
-</html>
+    function markDocumentRead(type) {
+        if (type === 'terms') readTerms = true;
+        if (type === 'privacy') readPrivacy = true;
+        if (readTerms && readPrivacy) {
+            document.getElementById('acceptAllBtn').disabled = false;
+        }
+    }
+
+    function onConsentsAccepted() {
+        hasAcceptedConsentsInFlow = true;
+        bootstrap.Modal.getInstance(document.getElementById('termsModal')).hide();
+        triggerSmsDispatch();
+    }
+
+    async function triggerSmsDispatch() {
+        const smsModalEl = document.getElementById('smsCodeModal');
+        const smsModal = new bootstrap.Modal(smsModalEl);
+        document.getElementById('smsTargetPhoneInfo').textContent = `Код отправлен на номер: ${senderPhone}`;
+        document.getElementById('smsCodeInput').value = '';
+        const st = document.getElementById('smsModalStatus');
+        st.classList.add('d-none');
+        smsModal.show();
+
+        try {
+            const response = await fetch('/api/v1/auth/request-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: senderPhone })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                st.textContent = data.message || 'Код успешно отправлен';
+                st.className = 'alert alert-success p-2 small';
+                st.classList.remove('d-none');
+            } else {
+                st.textContent = data.detail || 'Ошибка отправки SMS';
+                st.className = 'alert alert-danger p-2 small';
+                st.classList.remove('d-none');
+            }
+        } catch (e) {
+            st.textContent = 'Ошибка отправки SMS. Попробуйте снова.';
+            st.className = 'alert alert-danger p-2 small';
+            st.classList.remove('d-none');
+        }
+    }
+
+    async function verifyAndSendMessages() {
+        const code = document.getElementById('smsCodeInput').value.trim();
+        const st = document.getElementById('smsModalStatus');
+        const btn = document.getElementById('btnVerifyAndFinish');
+
+        if (!code || code.length < 4) {
+            st.textContent = 'Введите код из SMS';
+            st.className = 'alert alert-danger p-2 small';
+            st.classList.remove('d-none');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+
+        try {
+            const res = await fetch('/api/v1/messages/quick-send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: senderPhone,
+                    code: code,
+                    terms_accepted: hasAcceptedConsentsInFlow,
+                    text: document.getElementById('msgText').value.trim(),
+                    contacts: contacts
+                })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('user_phone', senderPhone);
+                bootstrap.Modal.getInstance(document.getElementById('smsCodeModal')).hide();
+                window.location.href = `/orders/${data.order_id}`;
+            } else {
+                st.textContent = data.detail || 'Неверный код или превышен лимит';
+                st.className = 'alert alert-danger p-2 small';
+                st.classList.remove('d-none');
+                btn.disabled = false;
+                btn.textContent = 'Подтвердить и отправить';
+            }
+        } catch (e) {
+            st.textContent = 'Ошибка сети при отправке';
+            st.className = 'alert alert-danger p-2 small';
+            st.classList.remove('d-none');
+            btn.disabled = false;
+            btn.textContent = 'Подтвердить и отправить';
+        }
+    }
+
+    renderContacts();
+</script>
+{% endblock %}

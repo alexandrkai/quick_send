@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData(form);
         const data = {
-            user_name: formData.get('name'),
-            user_email: formData.get('email'),
+            name: formData.get('name'),
+            email: formData.get('email'),
             topic: formData.get('subject'),
             message: formData.get('message'),
         };

@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+
+{% block title %}MSGPRO - Быстрая отправка{% endblock %}
+{% block keywords %}отправка, смс, email, бесплатно, форма{% endblock %}
+{% block description %}Быстрая отправка СМС и Email сообщений.{% endblock %}
+
+{% block content %}
+<div class="inner-banner-two bg-one border-30 z-1 pt-100 lg-pt-60 pb-90 lg-pb-50 mt-30 lg-mt-20 position-relative">
+    <div class="container">
+        <div class="title-one text-center">
+            <h2>Быстрая отправка</h2>
+        </div>
+    </div>
+    <img src="/static/images/shape/shape_89.svg" alt="" class="shapes shape_01">
+</div>
+
+<div class="block-feature-one border-30 bg-three mt-30 lg-mt-20 pt-100 lg-pt-60 pb-120 lg-pb-70">
+    <div class="container">
+        <div class="wrapper m-auto" style="max-width: 860px;">
+            <div class="card border-0 shadow-sm p-4 p-lg-5 rounded-4 bg-white">
+                
+                <form id="quickSendForm" onsubmit="event.preventDefault(); startVerificationFlow();">
+                    <!-- Текст сообщения -->
+                    <div class="mb-4">
+                        <label for="msgText" class="form-label fw-bold">Текст сообщения</label>
+                        <textarea name="text" id="msgText" class="form-control" rows="5"
+                            placeholder="Введите текст сообщения..." required oninput="checkLength()"></textarea>
+                        <div class="d-flex justify-content-between mt-2">
+                            <div id="lengthStatus" class="small text-muted">0 / 500</div>
+                            <div id="limitAlert" class="small text-danger fw-bold"></div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Получатели -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Добавить получателя (до 10 контактов в час)</label>
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <input type="tel" id="contactPhone" class="form-control" placeholder="Телефон (+79990000000)">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="email" id="contactEmail" class="form-control" placeholder="Email (user@example.com)">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn-two w-100 py-2" onclick="addContact()">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="contactError" class="text-danger small mt-1 d-none">Укажите телефон или email</div>
+                    </div>
+
+                    <!-- Таблица получателей -->
+                    <div class="mb-4">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle" id="contactsTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Телефон</th>
+                                        <th>Email</th>
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contactsTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="emptyContacts" class="text-muted small">Список получателей пуст. Добавьте контакты.</div>
+                    </div>
+
+                    <div id="formMsg" class="alert d-none mb-3" role="alert"></div>
+
+                    <button type="submit" class="btn-one w-100 text-center py-3" id="mainSubmitBtn">
+                        Отправить сообщение
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО 1: Ввод телефона -->
+<div class="modal fade" id="phoneModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-30 p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Ваш номер телефона</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Укажите ваш номер телефона для авторизации отправки:</p>
+                <div class="mb-3">
+                    <input type="tel" id="senderPhone" class="form-control" placeholder="+79990000000">
+                </div>
+                <div id="phoneModalError" class="alert alert-danger d-none p-2 small"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn-one w-100" id="btnCheckPhone" onclick="handlePhoneSubmit()">
+                    Продолжить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО 2: Ознакомление и принятие документов (ТОЛЬКО ЕСЛИ НЕ ПРИНЯТЫ) -->
+<div class="modal fade" id="termsModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-30 p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Принятие условий и политики</h5>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning small py-2 mb-3">
+                    Перед отправкой СМС-кода подтверждения необходимо ознакомиться и принять документы сервиса.
+                </div>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="tabTermsBtn" data-bs-toggle="tab" data-bs-target="#tabTerms">Условия использования</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="tabPrivacyBtn" data-bs-toggle="tab" data-bs-target="#tabPrivacy">Политика конфиденциальности</button>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3">
+                    <div class="tab-pane fade show active" id="tabTerms">
+                        <div id="termsScrollBox" style="max-height: 240px; overflow-y: auto; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;"></div>
+                        <div class="mt-2 text-end">
+                            <button class="btn btn-sm btn-outline-success" id="termsCheckBtn" disabled onclick="markDocumentRead('terms')">Ознакомлен</button>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="tabPrivacy">
+                        <div id="privacyScrollBox" style="max-height: 240px; overflow-y: auto; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px;"></div>
+                        <div class="mt-2 text-end">
+                            <button class="btn btn-sm btn-outline-success" id="privacyCheckBtn" disabled onclick="markDocumentRead('privacy')">Ознакомлен</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn-one" id="acceptAllBtn" disabled onclick="onConsentsAccepted()">
+                    Я принимаю условия
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО 3: Ввод SMS-кода -->
+<div class="modal fade" id="smsCodeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-30 p-3">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Подтверждение кодом</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="small text-muted mb-2" id="smsTargetPhoneInfo"></div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">6-значный код из SMS</label>
+                    <input type="text" id="smsCodeInput" class="form-control text-center fs-4" maxlength="6" placeholder="000000">
+                </div>
+                <div id="smsModalStatus" class="alert d-none p-2 small"></div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn-one w-100" id="btnVerifyAndFinish" onclick="verifyAndSendMessages()">
+                    Подтвердить и отправить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let contacts = [];
+    let senderPhone = '';
+    let hasAcceptedConsentsInFlow = false;
+    let readTerms = false;
+    let readPrivacy = false;
+
+    // --- Валидация текста ---
+    function checkLength() {
+        const text = document.getElementById('msgText').value;
+        const limit = 500;
+        const lenDiv = document.getElementById('lengthStatus');
+        const errDiv = document.getElementById('limitAlert');
+        lenDiv.textContent = `${text.length} / ${limit}`;
+        if (text.length > limit) {
+            errDiv.textContent = `Лимит превышен на ${text.length - limit}`;
+            lenDiv.classList.add('text-danger');
+            document.getElementById('mainSubmitBtn').disabled = true;
+        } else {
+            errDiv.textContent = '';
+            lenDiv.classList.remove('text-danger');
+            document.getElementById('mainSubmitBtn').disabled = false;
+        }
+    }
+
+    // --- Добавление контактов ---
+    function addContact() {
+        if (contacts.length >= 10) {
+            alert('Лимит: не более 10 получателей в час.');
+            return;
+        }
+        const p = document.getElementById('contactPhone').value.trim();
+        const e = document.getElementById('contactEmail').value.trim();
+        const err = document.getElementById('contactError');
+
+        if (!p && !e) {
+            err.classList.remove('d-none');
+            return;
+        }
+        err.classList.add('d-none');
+        contacts.push({ phone: p, email: e });
+        document.getElementById('contactPhone').value = '';
+        document.getElementById('contactEmail').value = '';
+        renderContacts();
+    }
+
+    function removeContact(i) {
+        contacts.splice(i, 1);
+        renderContacts();
+    }
+
+    function renderContacts() {
+        const tbody = document.getElementById('contactsTableBody');
+        const empty = document.getElementById('emptyContacts');
+        if (contacts.length === 0) {
+            tbody.innerHTML = '';
+            empty.classList.remove('d-none');
+            return;
+        }
+        empty.classList.add('d-none');
+        tbody.innerHTML = contacts.map((c, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${c.phone || '—'}</td>
+                <td>${c.email || '—'}</td>
+                <td><button type="button" class="btn btn-sm text-danger border-0" onclick="removeContact(${i})"><i class="bi bi-x-lg"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
+    // --- Старт верификации при нажатии «Отправить» ---
+    function startVerificationFlow() {
+        const text = document.getElementById('msgText').value.trim();
+        if (!text) return;
+        if (contacts.length === 0) {
+            alert('Добавьте хотя бы одного получателя');
+            return;
+        }
+
+        const savedPhone = localStorage.getItem('user_phone') || '';
+        if (savedPhone) document.getElementById('senderPhone').value = savedPhone;
+
+        new bootstrap.Modal(document.getElementById('phoneModal')).show();
+    }
+
+    // --- Шаг 1: Проверка согласий по номеру телефона ---
+    async function handlePhoneSubmit() {
+        senderPhone = document.getElementById('senderPhone').value.trim();
+        const errBox = document.getElementById('phoneModalError');
+        if (!senderPhone.match(/^\+7\d{10}$/)) {
+            errBox.textContent = 'Укажите номер в формате +7XXXXXXXXXX';
+            errBox.classList.remove('d-none');
+            return;
+        }
+        errBox.classList.add('d-none');
+
+        const btn = document.getElementById('btnCheckPhone');
+        btn.disabled = true;
+        btn.textContent = 'Проверка...';
+
+        try {
+            const res = await fetch('/api/v1/auth/check-consent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: senderPhone })
+            });
+            const data = await res.json();
+
+            bootstrap.Modal.getInstance(document.getElementById('phoneModal')).hide();
+
+            if (data.need_consent) {
+                // Если согласия НЕ приняты — открываем окно документов (SMS НЕ ОТПРАВЛЯЕТСЯ)
+                openTermsModal(data.terms, data.privacy);
+            } else {
+                // Согласия УЖЕ есть — сразу высылаем SMS-код
+                hasAcceptedConsentsInFlow = false;
+                triggerSmsDispatch();
+            }
+        } catch (e) {
+            errBox.textContent = 'Ошибка связи с сервером';
+            errBox.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Продолжить';
+        }
+    }
+
+    // --- Шаг 2: Окно документов ---
+    function openTermsModal(terms, privacy) {
+        document.getElementById('termsScrollBox').innerHTML = terms.content;
+        document.getElementById('privacyScrollBox').innerHTML = privacy.content;
+        readTerms = false;
+        readPrivacy = false;
+        document.getElementById('acceptAllBtn').disabled = true;
+
+        bindScrollListener('termsScrollBox', 'termsCheckBtn');
+        bindScrollListener('privacyScrollBox', 'privacyCheckBtn');
+
+        new bootstrap.Modal(document.getElementById('termsModal')).show();
+    }
+
+    function bindScrollListener(boxId, btnId) {
+        const b = document.getElementById(boxId);
+        const btn = document.getElementById(btnId);
+        btn.disabled = true;
+        b.onscroll = function() {
+            if (b.scrollTop >= b.scrollHeight - b.clientHeight - 5) {
+                btn.disabled = false;
+            }
+        };
+    }
+
+    function markDocumentRead(type) {
+        if (type === 'terms') readTerms = true;
+        if (type === 'privacy') readPrivacy = true;
+        if (readTerms && readPrivacy) {
+            document.getElementById('acceptAllBtn').disabled = false;
+        }
+    }
+
+    // Пользователь нажал «Я принимаю» -> ТОЛЬКО СЕЙЧАС шлем SMS
+    function onConsentsAccepted() {
+        hasAcceptedConsentsInFlow = true;
+        bootstrap.Modal.getInstance(document.getElementById('termsModal')).hide();
+        triggerSmsDispatch();
+    }
+
+    // --- Шаг 3: Отправка SMS-кода и показ окна ввода ---
+    async function triggerSmsDispatch() {
+        const smsModalEl = document.getElementById('smsCodeModal');
+        const smsModal = new bootstrap.Modal(smsModalEl);
+        document.getElementById('smsTargetPhoneInfo').textContent = `Код отправлен на номер: ${senderPhone}`;
+        document.getElementById('smsCodeInput').value = '';
+        document.getElementById('smsModalStatus').classList.add('d-none');
+        smsModal.show();
+
+        try {
+            await fetch('/api/v1/auth/request-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: senderPhone })
+            });
+        } catch (e) {
+            const st = document.getElementById('smsModalStatus');
+            st.textContent = 'Ошибка отправки SMS. Попробуйте снова.';
+            st.className = 'alert alert-danger p-2 small';
+            st.classList.remove('d-none');
+        }
+    }
+
+    // --- Шаг 4: Валидация кода и отправка пачки сообщений ---
+    async function verifyAndSendMessages() {
+        const code = document.getElementById('smsCodeInput').value.trim();
+        const st = document.getElementById('smsModalStatus');
+        const btn = document.getElementById('btnVerifyAndFinish');
+
+        if (!code || code.length < 4) {
+            st.textContent = 'Введите код из SMS';
+            st.className = 'alert alert-danger p-2 small';
+            st.classList.remove('d-none');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+
+        try {
+            const res = await fetch('/api/v1/messages/bulk-send-verified', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: senderPhone,
+                    code: code,
+                    terms_accepted: hasAcceptedConsentsInFlow,
+                    text: document.getElementById('msgText').value.trim(),
+                    contacts: contacts
+                })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('user_phone', senderPhone);
+                bootstrap.Modal.getInstance(document.getElementById('smsCodeModal')).hide();
+                window.location.href = `/orders/${data.order_id}`;
+            } else {
+                st.textContent = data.detail || 'Неверный код или превышен лимит';
+                st.className = 'alert alert-danger p-2 small';
+                st.classList.remove('d-none');
+                btn.disabled = false;
+                btn.textContent = 'Подтвердить и отправить';
+            }
+        } catch (e) {
+            st.textContent = 'Ошибка сети при отправке';
+            st.className = 'alert alert-danger p-2 small';
+            st.classList.remove('d-none');
+            btn.disabled = false;
+            btn.textContent = 'Подтвердить и отправить';
+        }
+    }
+
+    renderContacts();
+</script>
+{% endblock %}
