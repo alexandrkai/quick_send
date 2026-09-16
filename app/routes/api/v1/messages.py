@@ -1,9 +1,9 @@
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status,Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.models.models import User, VerificationType, get_db
-from app.schemas.schemas import QuickSendRequest, BulkSendRequest
+from app.schemas.schemas import QuickSendRequest, BulkSendRequest, LoginApiResponse
 from app.services.message import MessageService
 from app.services.user import UserService
 from app.services.verification import VerificationService
@@ -34,18 +34,17 @@ def quick_send(
 
     verification_service = VerificationService(db)
     user_service = UserService(db)
-    user_document_service = UserDocumentService(db)
 
-    # 1. Поиск или создание пользователя
-    target_user = user_service.get_user_by_phone(data.phone)
-    if not target_user:
-        target_user = user_service.find_and_create_user(phone=data.phone)
-
+    # 1. Поиск пользователя
+    user = user_service.get_user_by_phone(data.phone)
+    if not user:
+        # user = user_service.find_and_create_user(phone=data.phone)
+        raise Exception("Пользователь с таким телефоном не найден!")
     # 2. Проверка проверочного кода (возвращает объект VerificationCode)
     verified_code = verification_service.verify_code(
         code=data.code,
         type=VerificationType.LOGIN,
-        user=target_user,
+        user=user,
     )
     if not verified_code:
         raise HTTPException(
@@ -57,9 +56,11 @@ def quick_send(
     client_ip = get_client_ip(request)
     user_agent = request.headers.get("User-Agent")
 
+    user_document_service = UserDocumentService(db)
+
     # 4. Фиксация согласия с документами через обновленный сервис
     user_document_service.confirm_user_documents(
-        user_id=target_user.id,
+        user_id=user.id,
         verification_code_id=verified_code.id,
         ip_address=client_ip,
         user_agent=user_agent,
@@ -69,20 +70,25 @@ def quick_send(
     message_service = MessageService(db)
     try:
         order = message_service.send_bulk_email_phone(
-            sender_phone=target_user.phone,
+            sender_phone=user.phone,
             recipients=data.contacts,
             text=data.text,
-            sender_user_id=target_user.id,
+            sender_user_id=user.id,
             ip_address=client_ip,
         )
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    return {
-        "status": "ok",
-        "order_uuid": str(order.uuid),
-        "count": len(order.messages),
-    }
+    # return {
+    #     "status": "ok",
+    #     "order_uuid": str(order.uuid),
+    #     "count": len(order.messages),
+    # }
+    return LoginApiResponse(
+        status_code=0,
+        data={"order_id": str(order.uuid)}
+    )
 
 
 @router.post("/bulk-send")
@@ -129,11 +135,13 @@ def get_order_status(
     message_service = MessageService(db)
     messages = message_service.get_by_order_id(order_id)
     if not messages:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Заказ не найден")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Заказ не найден")
 
     # Проверка прав: авторство через user_id или номер отправителя
     first_msg = messages[0]
     if first_msg.user_id != current_user.id and first_msg.order.sender_identifier != current_user.phone:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Доступ запрещен")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Доступ запрещен")
 
     return messages

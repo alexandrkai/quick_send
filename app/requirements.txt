@@ -11,3 +11,5 @@ passlib[bcrypt]
 redis
 jinja2
 aiofiles
+
+pytest

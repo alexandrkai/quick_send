@@ -96,7 +96,7 @@ class PermissionProhibitionService:
             schema.channel_identifier, "value", str(schema.channel_identifier))
         if channel_id_str == "phone":
             count = crud_verification_code.count_recent_codes_for_contact(
-                self.db, contact_id=contact.id
+                self.db, contact_id=contact.id,hours=settings.LIMIT_PERIOD_HOURS
             )
             if count >= settings.LIMIT_COUNT_SMS_FOR_LIMIT_PERIOD_HOURS:
                 raise HTTPException(

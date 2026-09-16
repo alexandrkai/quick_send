@@ -38,7 +38,7 @@ app.add_middleware(
 )
 
 # Подключение статики (CSS, JS, images)
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="app/templates/static"), name="static")
 
 # Подключение API-роутеров
 app.include_router(admin.router, prefix="/api/v1") 

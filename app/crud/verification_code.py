@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from sqlalchemy.orm import Session
-
+from app.config.config import settings
 from app.crud.base import CRUDBase
 from app.models.models import VerificationCode, VerificationType, Contact, User
 from app.schemas.schemas import VerificationCodeCreate, VerificationCodeUpdate
@@ -65,7 +65,7 @@ class CRUDVerificationCode(CRUDBase[VerificationCode, VerificationCodeCreate, Ve
         *,
         contact_id: Optional[int] = None,
         user_id: Optional[int] = None,
-        hours: int = 1
+        hours: int =settings.LIMIT_PERIOD_HOURS
     ) -> int:
         since = datetime.now() - timedelta(hours=hours)
         conditions = [VerificationCode.created_at >= since]

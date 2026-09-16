@@ -16,17 +16,17 @@ from sqlalchemy.orm import Session
 from app.schemas import DocumentInfo
 from app.models import (
     get_db,
-    ApprovalType
+    ApprovalType,VerificationType
 )
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и верификация"])
 
 @router.post("/request-sms")
-def request_sms_code(data: PhoneRequest, db: Session = Depends(get_db)):
+def request_sms(data: PhoneRequest, db: Session = Depends(get_db)):
     """Запрос кода для входа по СМС."""
     try:
         verification_service=VerificationService(db)
-        return verification_service.request_code_user(data)
+        return verification_service.auth_request_sms(data)
     except HTTPException:
         raise
     except Exception as e:
@@ -39,7 +39,7 @@ def verify_sms_code(data: CodeRequest, db: Session = Depends(get_db)):
     verification_service = VerificationService(db)
     channel_service =ChannelService(db)
     channel=channel_service.get_channel_by_code("phone")
-    if not verification_service.verify_code(channel,data.phone, data.code,"login"):
+    if not verification_service.verify_code(channel,data.phone, data.code,VerificationType.LOGIN):
         raise HTTPException(status_code=400, detail="Неверный или просроченный код")
     # Найти или создать пользователя
     user_service = UserService(db)

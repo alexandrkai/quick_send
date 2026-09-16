@@ -41,8 +41,7 @@ class Settings(BaseSettings):
     EMAIL_PROVIDER: str = "dummy"
     DEBUG: bool = True
 
-    LIMIT_PERIOD_HOURS: int = 1
-    LIMIT_COUNT_SMS_FOR_LIMIT_PERIOD_HOURS: int = 10
+    
 
     # --- SMTP конфигурация ---
     SMTP_HOST: str = "smtp.gmail.com"
@@ -52,8 +51,9 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = "info@msgpro.ru"
 
     # --- Бизнес-правила и лимиты ---
-    LIMITS_PER_HOUR: int = 10
-
+    LIMIT_PERIOD_HOURS: int = 1
+    LIMIT_COUNT_SMS_FOR_LIMIT_PERIOD_HOURS: int = 10
+    
     # --- Регулярные выражения валидации ---
     PHONE_VALIDATION_REGEX: str = r"^\+7\(?\d{3}\)?[ -]?\d{3}[ -]?\d{2}[ -]?\d{2}$"
     # "^[^@\s]+@[^@\s]+\.[^@\s]+$"

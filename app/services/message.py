@@ -65,13 +65,13 @@ class MessageService:
         sender_phone: str,
         recipients: List[dict],
         text: str,
-        default_channel_code: str,
+        # default_channel_code: str,
         sender_user_id: Optional[int] = None,
         ip_address: Optional[str] = None,
     ) -> Order:
         # 1. Проверка лимитов отправки
         if not self.rate_limit_service.check_limit(sender_phone):
-            raise ValueError("Превышен лимит отправок сообщений в час")
+            raise ValueError("Превышен лимит отправок смс-сообщений в час")
 
         # 2. Вычисление хеша контента для антиспама
         content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()

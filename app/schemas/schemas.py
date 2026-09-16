@@ -111,6 +111,7 @@ class QuickSendRequest(PhoneBase):
     terms_accepted: bool
     text: str
     contacts: List[dict]
+    token:Optional[str]=None
 
 
 class BulkSendRequest(PhoneBase):
@@ -334,12 +335,13 @@ class PermissionProhibitionRequestSMSResponse(PermissionProhibitionResponse):
 
 
 class PermissionProhibitionApiResponse(BaseModel):
+    status: Optional[str] = "ok"
     token: Optional[str] = None
     message: Optional[str] = None
     status_code: int
 
 class LoginApiResponse(PermissionProhibitionApiResponse):
-    pass
+    data:Optional[dict]=None
 
 class PermissionProhibitionRequestSMS(BaseModel):
     token: Optional[str] = None

@@ -57,7 +57,7 @@ def check_recipient_permission(
         channel_identifier_name=channel
     )
     
-    if rule and rule.type == PermissionProhibitionType.BLOCKED:
+    if rule and rule.type == PermissionProhibitionType.BLOCKED: # type: ignore
         channel_title = "телефоном" if channel == "phone" else "email"
         return ContactCheckResponse(
             allowed=False,
