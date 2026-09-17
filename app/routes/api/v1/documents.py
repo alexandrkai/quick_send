@@ -11,9 +11,9 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 @router.get("/active/{doc_type}")
 def get_active_document(doc_type: str, db: Session = Depends(get_db)):
     # Получить активную версию для публичного доступа
-    from app.models.models import ApprovalType
+    from app.models.models import UserDocumentType
     try:
-        doc_type_enum = ApprovalType(doc_type)
+        doc_type_enum = UserDocumentType(doc_type)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid document type")
     doc = crud_document.get_active(db, doc_type_enum)

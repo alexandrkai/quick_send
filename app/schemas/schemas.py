@@ -6,8 +6,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.config.config import settings
 from app.models.models import (
-    ApprovalStatus,
-    ApprovalType,
+    UserDocumentStatus,
+    UserDocumentType,
     ChannelType,
     ContactType,
     MessageStatus,
@@ -35,7 +35,8 @@ class PhoneBase(BaseModel):
         if clean_phone.startswith("8") and len(clean_phone) == 11:
             clean_phone = "+7" + clean_phone[1:]
         if not re.match(settings.PHONE_VALIDATION_REGEX, clean_phone):
-            raise ValueError("Номер телефона должен быть в формате +7XXXXXXXXXX")
+            raise ValueError(
+                "Номер телефона должен быть в формате +7XXXXXXXXXX")
         return clean_phone
 
 
@@ -85,7 +86,7 @@ class UserBase(PhoneBase):
 
 
 class UserCreate(UserBase):
-    password_hash: Optional[str] = None
+    password_hash: Optional[str] = Field(default=None)
 
 
 class UserUpdate(BaseModel):
@@ -111,7 +112,8 @@ class QuickSendRequest(PhoneBase):
     terms_accepted: bool
     text: str
     contacts: List[dict]
-    token:Optional[str]=None
+    token: Optional[str] = Field(default=None)
+    data_token: Optional[str] = Field(default=None)
 
 
 class BulkSendRequest(PhoneBase):
@@ -136,7 +138,7 @@ class CheckApprovalRequest(PhoneBase):
 class DocumentInfo(BaseModel):
     id: int
     version: str
-    title: Optional[str] = None
+    title: Optional[str] = Field(default=None)
     content: str
 
 
@@ -153,7 +155,7 @@ class ApprovalBase(BaseModel):
     ip_address: Optional[str] = Field(default=None)
     user_agent: Optional[str] = Field(default=None)
     verification_code_id: Optional[int] = Field(default=None)
-    status: ApprovalStatus = Field(default=ApprovalStatus.DRAFT)
+    status: UserDocumentStatus = Field(default=UserDocumentStatus.DRAFT)
 
 
 class ApprovalCreate(ApprovalBase):
@@ -165,7 +167,7 @@ class ApprovalUpdate(BaseModel):
     ip_address: Optional[str] = Field(default=None)
     user_agent: Optional[str] = Field(default=None)
     verification_code_id: Optional[int] = Field(default=None)
-    status: Optional[ApprovalStatus] = None
+    status: Optional[UserDocumentStatus] = None
 
 
 class ApprovalInDBBase(ApprovalBase):
@@ -197,7 +199,7 @@ class UserDocumentInDB(ApprovalInDBBase):
 
 
 class DocumentBase(BaseModel):
-    doc_type: ApprovalType
+    doc_type: UserDocumentType
     version: str
     title: Optional[str] = Field(default=None)
     content: str
@@ -339,15 +341,19 @@ class PermissionProhibitionApiResponse(BaseModel):
     token: Optional[str] = None
     message: Optional[str] = None
     status_code: int
+    data_token: Optional[str] = None
+
 
 class LoginApiResponse(PermissionProhibitionApiResponse):
-    data:Optional[dict]=None
+    data: Optional[dict] = None
+
 
 class PermissionProhibitionRequestSMS(BaseModel):
     token: Optional[str] = None
     channel_identifier: ContactType
     value: str
     type: PermissionProhibitionType
+    data_token: Optional[str] = None
 
     @field_validator("value")
     @classmethod
@@ -361,9 +367,11 @@ class PermissionProhibitionRequestSMS(BaseModel):
             elif digits.startswith("7") and len(digits) == 11:
                 pass
             else:
-                raise ValueError("Номер телефона должен содержать 11 цифр и относиться к РФ (+7/8)")
+                raise ValueError(
+                    "Номер телефона должен содержать 11 цифр и относиться к РФ (+7/8)")
             if not digits.startswith("7"):
-                raise ValueError("Поддерживаются только мобильные номера РФ (+7...)")
+                raise ValueError(
+                    "Поддерживаются только мобильные номера РФ (+7...)")
             return f"+{digits}"
         elif channel_identifier == ContactType.EMAIL:
             email_lower = v.lower()
@@ -454,7 +462,8 @@ class MessageCreate(MessageBase):
     user_id: Optional[int] = Field(default=None)
     channel_identifier_id: int
     order_id: int
-
+    status: MessageStatus
+    error_message: Optional[str] = None
 
 class MessageUpdate(BaseModel):
     status: Optional[MessageStatus] = Field(default=None)
@@ -475,31 +484,23 @@ class MessageInDB(MessageBase):
 
 
 class OrderCreate(BaseModel):
-    user_id: Optional[int] = None
-    ip_address: Optional[str] = None
-    text_preview: Optional[str] = None
+    user_id: int
+    sender_identifier: str
+    ip_address: str
+    text_preview: str
     content_hash: Optional[str] = None
     status: OrderStatus = OrderStatus.PENDING
+    is_flagged : Optional[bool] = False
+    flag_reason : Optional[str] = None
 
 
 class OrderUpdate(BaseModel):
     status: Optional[OrderStatus] = None
-    total_recipients: Optional[int] = Field(default=None)
 
 
-class OrderBase(BaseModel):
-    user_id: Optional[int] = None
-    ip_address: Optional[str] = None
-    text_preview: Optional[str] = None
-    content_hash: Optional[str] = None
-    is_flagged: bool = False
-    flag_reason: Optional[str] = None
-
-
-class OrderInDB(OrderBase):
+class OrderInDB(OrderCreate):
     id: int
     uuid: UUID
-    status: OrderStatus
     created_at: datetime
     updated_at: datetime
 

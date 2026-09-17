@@ -9,6 +9,7 @@ from app.services.user import UserService
 from app.services.verification import VerificationService
 from app.services.user_document import UserDocumentService
 from app.core.dependencies import get_current_user, get_current_user_from_httponly_cookies
+from app.core.redis.redis import *
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -26,85 +27,33 @@ def quick_send(
     request: Request,
     db: Session = Depends(get_db),
 ):
-    if not data.terms_accepted:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Не приняты Условия использования и/или Политика конфиденциальности",
-        )
-
-    verification_service = VerificationService(db)
-    user_service = UserService(db)
-
-    # 1. Поиск пользователя
-    user = user_service.get_user_by_phone(data.phone)
-    if not user:
-        # user = user_service.find_and_create_user(phone=data.phone)
-        raise Exception("Пользователь с таким телефоном не найден!")
-    # 2. Проверка проверочного кода (возвращает объект VerificationCode)
-    verified_code = verification_service.verify_code(
-        code=data.code,
-        type=VerificationType.LOGIN,
-        user=user,
-    )
-    if not verified_code:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Неверный или просроченный код",
-        )
-
-    # 3. Извлечение сетевых данных клиента
-    client_ip = get_client_ip(request)
-    user_agent = request.headers.get("User-Agent")
-
-    user_document_service = UserDocumentService(db)
-
-    # 4. Фиксация согласия с документами через обновленный сервис
-    user_document_service.confirm_user_documents(
-        user_id=user.id,
-        verification_code_id=verified_code.id,
-        ip_address=client_ip,
-        user_agent=user_agent,
-    )
-
-    # 5. Отправка сообщений
-    message_service = MessageService(db)
     try:
-        order = message_service.send_bulk_email_phone(
-            sender_phone=user.phone,
-            recipients=data.contacts,
-            text=data.text,
-            sender_user_id=user.id,
-            ip_address=client_ip,
-        )
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
-    # return {
-    #     "status": "ok",
-    #     "order_uuid": str(order.uuid),
-    #     "count": len(order.messages),
-    # }
-    return LoginApiResponse(
-        status_code=0,
-        data={"order_id": str(order.uuid)}
-    )
+        client_ip = get_client_ip(request)
+        user_agent = request.headers.get("User-Agent")
+        service=MessageService(db)
+        return service.send_phone_email(data,client_ip,user_agent)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
 
 
 @router.post("/bulk-send")
 def bulk_send(
     data: BulkSendRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Массовая отправка авторизованным пользователем."""
+    client_ip = get_client_ip(request)
     message_service = MessageService(db)
     order = message_service.send_bulk_email_phone(
         sender_phone=current_user.phone,
         recipients=data.contacts,
         text=data.text,
-        channel_type=data.channel_type,
-        sender_user_id=current_user.id
+        sender_user_id=current_user.id,
+        ip_address=client_ip,
     )
     return {
         "status": "ok",

@@ -1,7 +1,7 @@
 import hashlib
 from typing import List, Optional
 from sqlalchemy.orm import Session
-
+from datetime import datetime,timedelta
 from app.crud.base import CRUDBase
 from app.models.models import (
     Contact,
@@ -13,12 +13,13 @@ from app.models.models import (
     PermissionProhibitionStatus,
     PermissionProhibitionType,
     S_Channel,
-    S_ChannelIdentifier,
+    S_ChannelIdentifier,VerificationType
 )
-from app.schemas.schemas import MessageCreate, OrderCreate
+from app.schemas.schemas import MessageCreate, OrderCreate,QuickSendRequest,LoginApiResponse
 from app.services.channel import ChannelService
 from app.services.contact import ContactService
 from app.services.rate_limit import RateLimitService
+from app.core.redis.redis import *
 
 crud_order = CRUDBase[Order, OrderCreate, dict](Order)
 crud_message = CRUDBase[Message, MessageCreate, dict](Message)
@@ -60,30 +61,50 @@ class MessageService:
         )
         return rule is not None
 
+    # антиспам TODO
+    def anti_spam(self,order:OrderCreate):
+        # Быстрая проверка: не рассылался ли этот же текст за последний час более 5 раз?
+        content_hash = hashlib.sha256(order.text_preview.encode("utf-8")).hexdigest()
+        
+        recent_count = (
+            self.db.query(Order)
+            .filter(
+                Order.content_hash == content_hash,
+                Order.created_at >= datetime.now() - timedelta(hours=1)
+            )
+            .count()
+        )
+
+        if recent_count >= 5:
+            order.content_hash=content_hash
+            order.is_flagged = True
+            order.flag_reason = "duplicate_content_hash_burst"
+    
     def send_bulk_email_phone(
         self,
         sender_phone: str,
         recipients: List[dict],
         text: str,
-        # default_channel_code: str,
-        sender_user_id: Optional[int] = None,
-        ip_address: Optional[str] = None,
+        sender_user_id: int,
+        ip_address: str
     ) -> Order:
-        # 1. Проверка лимитов отправки
-        if not self.rate_limit_service.check_limit(sender_phone):
-            raise ValueError("Превышен лимит отправок смс-сообщений в час")
+        # 1. Проверка лимитов отправки TODO
+        # if not self.rate_limit_service.check_limit(sender_phone):
+        #     raise ValueError("Превышен лимит отправок смс-сообщений в час")
 
         # 2. Вычисление хеша контента для антиспама
-        content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        # content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
 
         # 3. Создание заказа (содержит только актуальные поля модели Order)
         order_in = OrderCreate(
+            sender_identifier=sender_phone,
             user_id=sender_user_id,
             ip_address=ip_address,
             text_preview=text,
-            content_hash=content_hash,
+            # content_hash=content_hash,
             status=OrderStatus.PROCESSING,
         )
+        self.anti_spam(order_in)
         order = crud_order.create(self.db, obj_in=order_in)
 
         # 4. Формирование сообщений по получателям
@@ -137,3 +158,68 @@ class MessageService:
         # Обновляем объект, чтобы подтянулись созданные связанные сообщения
         self.db.refresh(order)
         return order
+    
+    def send_phone_email(self,data: QuickSendRequest,client_ip:str,user_agent:str)->LoginApiResponse:
+        
+        from app.services.user import UserService
+        from app.services.verification import VerificationService
+        from app.services.user_document import UserDocumentService
+        
+        verification_service = VerificationService(self.db)
+        user_service = UserService(self.db)
+        user_document_service = UserDocumentService(self.db)
+        
+        key = "auth_login"
+        session_data=None
+        
+        if not data.terms_accepted:
+            raise Exception("Не приняты Условия использования и/или Политика конфиденциальности" )
+        
+        if data.data_token and check_exists(key, data.data_token):
+            session_data = read_value(key, data.data_token)
+            if not session_data["phone"]==data.phone:
+                delete_value(key, data.data_token)
+                # raise Exception("Данные формы не совпадают с запрошенной сессией подтверждения. Запросите код заново.")
+            
+        
+        
+        # 1. Поиск пользователя
+        user = user_service.get_user_by_phone(data.phone)
+        if not user:
+            # user = user_service.find_and_create_user(phone=data.phone)
+            raise Exception("Пользователь с таким телефоном не найден!")
+        # 2. Проверка проверочного кода (возвращает объект VerificationCode)
+        verified_code = verification_service.verify_code(
+            code=data.code,
+            type=VerificationType.LOGIN,
+            user=user,
+        )
+        if not verified_code:
+            raise Exception("Неверный или просроченный код" )
+
+        # 4. Фиксация согласия с документами через обновленный сервис
+        user_document_service.confirm_user_documents(
+            user_id=user.id,
+            verification_code_id=verified_code.id,
+            ip_address=client_ip,
+            user_agent=user_agent,
+        )
+
+        # 5. Отправка сообщений
+        try:
+            order = self.send_bulk_email_phone(
+                sender_phone=user.phone,
+                recipients=data.contacts,
+                text=data.text,
+                sender_user_id=user.id,
+                ip_address=client_ip,
+            )
+        except ValueError as e:
+            raise Exception(str(e))
+
+        return LoginApiResponse(
+            status_code=0,
+            data={"order_id": str(order.uuid)}
+        )
+
+            

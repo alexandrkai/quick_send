@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.models.models import get_db,ApprovalType
+from app.models.models import get_db,UserDocumentType
 from app.schemas.schemas import CodeRequest
 from app.services.feedback import FeedbackService
 from app.services.email import send_feedback_email
@@ -15,8 +15,8 @@ def verify_sms_code(data: CodeRequest, db: Session = Depends(get_db)):
     token = create_access_token({"sub": user.phone})
 
     # Фиксируем согласие с текущими активными версиями
-    terms_version = document_version.get_active(db, ApprovalType.TERMS)
-    privacy_version = document_version.get_active(db, ApprovalType.PRIVACY)
+    terms_version = document_version.get_active(db, UserDocumentType.TERMS)
+    privacy_version = document_version.get_active(db, UserDocumentType.PRIVACY)
     if terms_version and privacy_version:
         # Проверим, есть ли уже согласие с этими версиями
         existing = user_consent.get_by_phone_and_versions(db, data.phone, terms_version.id, privacy_version.id)

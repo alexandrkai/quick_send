@@ -9,9 +9,10 @@ from app.crud.verification_code import crud_verification_code
 from app.services.user import UserService
 from app.services.channel import ChannelService
 from app.services.channel_identifier import ChannelIdentifierService
-from app.models.models import VerificationCode, User, Contact, VerificationType
+from app.services.user_document import UserDocumentService
+from app.models.models import VerificationCode, User, Contact, VerificationType,UserDocumentType
 from app.schemas.schemas import VerificationCodeCreate, PhoneRequest, LoginApiResponse
-from app.core.redis import read_value, write_value
+from app.core.redis.redis import read_value, write_value
 
 
 class VerificationService:
@@ -104,56 +105,85 @@ class VerificationService:
             self.db, contact_id=contact_id, user_id=user_id, type=type
         )
 
-    def auth_request_sms(self, data: PhoneRequest):
-        key = "permission_prohibition"
+    def auth_request_sms(self, data: PhoneRequest,client_ip:str,user_agent:str) -> LoginApiResponse:
+        key = "auth_login"
 
-        # Находим или создаем пользователя  по телефону
+        # 1. Находим или создаем пользователя
         user = self.user_service.find_and_create_user(data.phone)
 
-        # Рейтлимит: максимум 10 SMS в час на контакт
-        count = crud_verification_code.count_recent_codes_for_contact(self.db, user_id=user.id, hours=settings.LIMIT_PERIOD_HOURS)
+        # 2. Рейтлимит запросов SMS
+        count = crud_verification_code.count_recent_codes_for_contact(
+            self.db, user_id=user.id, hours=settings.LIMIT_PERIOD_HOURS
+        )
         if count >= settings.LIMIT_COUNT_SMS_FOR_LIMIT_PERIOD_HOURS:
-            raise Exception(
-                "Превышен лимит запросов SMS (не более 10 в час). Попробуйте позже.")
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Превышен лимит запросов SMS (не более 10 в час). Попробуйте позже."
+            )
 
-
-        # # Формируем полезную нагрузку для сессии Redis
-        # perm_type_str = getattr(schema.type, "value", str(schema.type))
         data_token = {
             "phone": data.phone,
             "user_id": user.id
         }
 
-        # Проверка наличия еще действующего кода (до 5 минут)
+        # 3. Проверка действующего активного кода
         active_code = crud_verification_code.get_active_code(
             self.db, user_id=user.id, type=VerificationType.LOGIN
         )
+        
+        user_document_service = UserDocumentService(self.db)
+
         if active_code:
-            data_token["vc_id"] = active_code.id
+            # Извлекаем черновики, привязанные к существующему активному коду
+            drafts = user_document_service.get_or_create_document_drafts_for_verification(
+                user_id=user.id,
+                verification_code_id=active_code.id,
+                ip_address=client_ip,
+                user_agent=user_agent
+            )
+            terms_doc = next((d for d in drafts if d.document and d.document.doc_type == UserDocumentType.TERMS.value), None)
+            privacy_doc = next((d for d in drafts if d.document and d.document.doc_type == UserDocumentType.PRIVACY.value), None)
+
+            data_token.update({
+                "vc_id": active_code.id,
+                "terms_id": terms_doc.id if terms_doc else None,
+                "privacy_id": privacy_doc.id if privacy_doc else None,
+            })
+
             seconds_left = max(
-                0, int((active_code.expires_at - datetime.now()).total_seconds()))
-            data = write_value(key, data_token, expires_in=seconds_left or 300)
+                0, int((active_code.expires_at - datetime.now()).total_seconds())
+            )
+            data_session = write_value(key, data_token, expires_in=seconds_left or 300)
             return LoginApiResponse(
-                message=f"Код подтверждения ранее был отправлен. Повтор возможен через {seconds_left} сек.",
+                message=f"Код подтверждения {active_code.code} ранее был отправлен. Повтор возможен через {seconds_left} сек.",
                 status_code=1,
-                token=data["verification_token"]
+                data_token=data_session["verification_token"]
             )
 
+        # 4. Генерация нового кода
         new_vc = self.generate_code(user=user, type=VerificationType.LOGIN)
+        data_token["vc_id"] = new_vc.id
 
-        data_token.update({
-            "vc_id": new_vc.id
-        })
-        from app.services.user_document import UserDocumentService
-        user_document_service=UserDocumentService(self.db)
-        drafts=user_document_service.create_document_drafts_for_verification(user_id=user.id,verification_code_id=new_vc.id)
-        # Отправка через провайдер (SMS / Email)
-        print(
-            f"[GATEWAY MOCK] Отправка кода {new_vc.code} на {user.phone}")
+        # 5. Формирование DRAFT согласий строго под новый код
+        drafts = user_document_service.get_or_create_document_drafts_for_verification(
+            user_id=user.id,
+            verification_code_id=new_vc.id,
+            ip_address=client_ip,
+            user_agent=user_agent
+        )
+        terms_doc = next((d for d in drafts if d.document and d.document.doc_type == UserDocumentType.TERMS.value), None)
+        privacy_doc = next((d for d in drafts if d.document and d.document.doc_type == UserDocumentType.PRIVACY.value), None)
 
-        data = write_value(key, data_token, expires_in=300)
+        data_token["terms_id"] = terms_doc.id if terms_doc else None
+        data_token["privacy_id"] = privacy_doc.id if privacy_doc else None
+
+        # 6. Отправка SMS через шлюз
+        print(f"[GATEWAY MOCK] Отправка кода {new_vc.code} на {user.phone}")
+
+        data_session = write_value(key, data_token, expires_in=300)
+
         return LoginApiResponse(
             message=f"Код подтверждения {new_vc.code} успешно отправлен. Срок действия — 5 минут.",
             status_code=1,
-            token=data["verification_token"]
+            data_token=data_session["verification_token"]
         )

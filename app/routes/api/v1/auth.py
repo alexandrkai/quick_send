@@ -1,14 +1,14 @@
 # app/api/v1/auth.py
-from fastapi import APIRouter, Depends, HTTPException, status,Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
-from app.schemas.schemas import PhoneRequest,CodeRequest,PasswordLoginRequest,RegisterRequest,CheckApprovalResponse,CheckApprovalRequest
+from app.schemas.schemas import PhoneRequest, CodeRequest, PasswordLoginRequest, RegisterRequest, CheckApprovalResponse, CheckApprovalRequest
 from app.utils.sms_provider import send_sms
 from app.utils.email_provider import send_email
 from app.models.models import get_db
-from app.services.user import UserService, crud_user,User
+from app.services.user import UserService, crud_user, User
 from app.services.verification import VerificationService
 from app.services.channel import ChannelService
-from app.core.security import create_access_token, verify_password, get_password_hash,get_current_user_from_httponly_cookies,set_HTTPOnly_Cookie,delete_HTTPOnly_Cookie
+from app.core.security import create_access_token, verify_password, get_password_hash, get_current_user_from_httponly_cookies, set_HTTPOnly_Cookie, delete_HTTPOnly_Cookie
 from app.crud.document import crud_document
 from app.crud.user_document import crud_user_document
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -16,31 +16,45 @@ from sqlalchemy.orm import Session
 from app.schemas import DocumentInfo
 from app.models import (
     get_db,
-    ApprovalType,VerificationType
+    UserDocumentType, VerificationType
 )
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и верификация"])
 
+
+def get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "127.0.0.1"
+
+
 @router.post("/request-sms")
-def request_sms(data: PhoneRequest, db: Session = Depends(get_db)):
+def request_sms(data: PhoneRequest,
+                request: Request,
+                db: Session = Depends(get_db)):
     """Запрос кода для входа по СМС."""
     try:
-        verification_service=VerificationService(db)
-        return verification_service.auth_request_sms(data)
+        client_ip = get_client_ip(request)
+        user_agent = request.headers.get("User-Agent")
+        verification_service = VerificationService(db)
+        return verification_service.auth_request_sms(data, client_ip, user_agent)
     except HTTPException:
         raise
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.post("/verify-sms")
 def verify_sms_code(data: CodeRequest, db: Session = Depends(get_db)):
     """Подтверждение СМС-кода и выдача JWT."""
     verification_service = VerificationService(db)
-    channel_service =ChannelService(db)
-    channel=channel_service.get_channel_by_code("phone")
-    if not verification_service.verify_code(channel,data.phone, data.code,VerificationType.LOGIN):
-        raise HTTPException(status_code=400, detail="Неверный или просроченный код")
+    channel_service = ChannelService(db)
+    channel = channel_service.get_channel_by_code("phone")
+    if not verification_service.verify_code(channel, data.phone, data.code, VerificationType.LOGIN):
+        raise HTTPException(
+            status_code=400, detail="Неверный или просроченный код")
     # Найти или создать пользователя
     user_service = UserService(db)
     user = user_service.find_and_create_user(data.phone)
@@ -63,13 +77,14 @@ def verify_sms_code(data: CodeRequest, db: Session = Depends(get_db)):
     #     max_age=60*60# пока сделал срок действия 1 час *24*7  # 7 дней (или используйте expires)
     # )
     # return response
-    data={
+    data = {
         "status": "ok",
         "user_id": user.id,
         "message": "Верификация успешна"
     }
-    response=set_HTTPOnly_Cookie(data,token)
+    response = set_HTTPOnly_Cookie(data, token)
     return response
+
 
 @router.post("/login")
 def login_password(data: PasswordLoginRequest, db: Session = Depends(get_db)):
@@ -77,11 +92,14 @@ def login_password(data: PasswordLoginRequest, db: Session = Depends(get_db)):
     user_service = UserService(db)
     user = user_service.get_user_by_phone(data.phone)
     if not user or not user.password_hash:
-        raise HTTPException(status_code=400, detail="Неверный логин или пароль")
+        raise HTTPException(
+            status_code=400, detail="Неверный логин или пароль")
     if not verify_password(data.password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Неверный логин или пароль")
+        raise HTTPException(
+            status_code=400, detail="Неверный логин или пароль")
     token = create_access_token({"sub": user.phone})
     return {"access_token": token, "token_type": "bearer"}
+
 
 @router.post("/register")
 def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
@@ -89,7 +107,8 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
     user_service = UserService(db)
     existing = user_service.get_user_by_phone(data.phone)
     if existing:
-        raise HTTPException(status_code=400, detail="Пользователь с таким телефоном уже существует")
+        raise HTTPException(
+            status_code=400, detail="Пользователь с таким телефоном уже существует")
     # Можно добавить проверку, что телефон подтверждён, но пока пропускаем
     user = user_service.create_user(
         phone=data.phone,
@@ -100,17 +119,22 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
     token = create_access_token({"sub": user.phone})
     return {"access_token": token, "token_type": "bearer", "user_id": user.id}
 
+
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user_from_httponly_cookies)):
     return current_user
 
 # для токена из обычных кук
+
+
 @router.post("/logout")
 def logout(response: Response):
     response.delete_cookie("access_token")
     return {"status": "ok"}
 
 # для токена HTTPOnly
+
+
 @router.post("/logout_httponly")
 def logout_HTTPOnly(response: Response):
     # Удаляем куку, устанавливая её с истекшим сроком
@@ -121,8 +145,9 @@ def logout_HTTPOnly(response: Response):
     #     httponly=True,
     #     samesite="lax"
     # )
-    delete_HTTPOnly_Cookie(response,name_cookie="access_token")
+    delete_HTTPOnly_Cookie(response, name_cookie="access_token")
     return {"status": "ok", "message": "Logged out"}
+
 
 @router.post(
     "/check-user-documents",
@@ -136,8 +161,10 @@ def check_user_consent(
     # 1. Получаем активные документы через crud
     docs = crud_document.get_active_terms_and_privacy(db)
 
-    active_terms = next((d for d in docs if getattr(d, 'doc_type', None) in ('terms', ApprovalType.TERMS)), None)
-    active_privacy = next((d for d in docs if getattr(d, 'doc_type', None) in ('privacy', ApprovalType.PRIVACY)), None)
+    active_terms = next((d for d in docs if getattr(
+        d, 'doc_type', None) in ('terms', UserDocumentType.TERMS)), None)
+    active_privacy = next((d for d in docs if getattr(
+        d, 'doc_type', None) in ('privacy', UserDocumentType.PRIVACY)), None)
 
     if not active_terms or not active_privacy:
         raise HTTPException(
@@ -154,7 +181,8 @@ def check_user_consent(
     else:
         # 3. Проверяем принятые документы пользователя по user_id со статусом APPROVED
         approved_doc_ids = set(
-            crud_user_document.get_user_approved_document_ids(db, user_id=user.id)
+            crud_user_document.get_user_approved_document_ids(db, user_id=user.id,
+                                                              doc_type_list=[UserDocumentType.TERMS, UserDocumentType.PRIVACY])
         )
         has_terms = active_terms.id in approved_doc_ids
         has_privacy = active_privacy.id in approved_doc_ids

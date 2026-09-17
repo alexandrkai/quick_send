@@ -16,7 +16,7 @@ from app.services.channel_identifier import ChannelIdentifierService
 from app.core.exceptions import ConsentException
 from app.schemas import *
 from app.services.contact import ContactService
-from app.core.redis import *
+from app.core.redis.redis import *
 import random
 
 

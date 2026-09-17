@@ -11,7 +11,7 @@ from app.config.config import settings
 from app.crud.channel import crud_channel
 from app.crud.channel_identifier import crud_channel_identifier
 from app.crud.document import crud_document
-from app.models.models import Base, ApprovalType, SessionLocal, engine
+from app.models.models import Base, UserDocumentType, SessionLocal, engine
 from app.schemas import ChannelCreate, ChannelIdentifierCreate, DocumentCreate
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ def __init_documents() -> None:
     """Инициализация активных версий юридических документов."""
     with SessionLocal() as db:
         try:
-            for doc in ApprovalType:
+            for doc in UserDocumentType:
                 path_file = os.path.join(
                     settings.PATH_DATA_DIR, "init", f"{doc.value}.html"
                 )
@@ -72,7 +72,7 @@ def __init_documents() -> None:
 
                 title = (
                     "Условия использования"
-                    if doc == ApprovalType.TERMS
+                    if doc == UserDocumentType.TERMS
                     else "Политика конфиденциальности"
                 )
 

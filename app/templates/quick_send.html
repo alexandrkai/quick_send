@@ -194,6 +194,7 @@
     let hasAcceptedConsentsInFlow = false;
     let readTerms = false;
     let readPrivacy = false;
+    let data_token = null;
 
     // --- Валидация длины текста ---
     function checkLength() {
@@ -398,7 +399,7 @@
             if (data.need_consent) {
                 openTermsModal(data.terms, data.privacy);
             } else {
-                hasAcceptedConsentsInFlow = false;
+                hasAcceptedConsentsInFlow = true;
                 triggerSmsDispatch();
             }
         } catch (e) {
@@ -466,6 +467,7 @@
             const data = await response.json();
 
             if (response.ok) {
+                data_token=data.data_token;
                 st.textContent = data.message || 'Код успешно отправлен';
                 st.className = 'alert alert-success p-2 small';
                 st.classList.remove('d-none');
@@ -505,7 +507,8 @@
                     code: code,
                     terms_accepted: hasAcceptedConsentsInFlow,
                     text: document.getElementById('msgText').value.trim(),
-                    contacts: contacts
+                    contacts: contacts,
+                    data_token:data_token
                 })
             });
             const data = await res.json();

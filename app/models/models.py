@@ -71,7 +71,7 @@ class PermissionProhibitionStatus(str, enum.Enum):
     DELETED = "deleted"
 
 
-class ApprovalStatus(str, enum.Enum):
+class UserDocumentStatus(str, enum.Enum):
     DRAFT = "draft"
     ACTIVE = "active"
     DELETED = "deleted"
@@ -87,16 +87,16 @@ class UserRole(str, enum.Enum):
     ADMIN = "admin"
 
 
-class ApprovalType(str, enum.Enum):
+class UserDocumentType(str, enum.Enum):
     TERMS = "terms"
     PRIVACY = "privacy"
 
 
 class OrderStatus(str, enum.Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    PROCESSING = "processing" #формирование заказа
+    PENDING = "pending" #отправка заказа
+    COMPLETED = "completed" #успешная отправка заказа
+    FAILED = "failed" #отправка заказа с ошибками
 
 
 class ApiResponseStatus(str, enum.Enum):
@@ -314,7 +314,7 @@ class UserDocument(Base, IdentifierMixin, CreatedMixin):
     document_id = Column(Integer, ForeignKey("s_documents.id", ondelete="RESTRICT"), nullable=False)
     ip_address = Column(String(45), nullable=True)
     user_agent = Column(String(255), nullable=True)
-    status = Column(Enum(ApprovalStatus), default=ApprovalStatus.DRAFT, nullable=False)
+    status = Column(Enum(UserDocumentStatus), default=UserDocumentStatus.DRAFT, nullable=False)
     verification_code_id = Column(Integer, ForeignKey("verification_codes.id", ondelete="SET NULL"), nullable=True)
 
     document = relationship("S_Document", back_populates="user_documents")
@@ -357,12 +357,11 @@ class Order(Base, IdentifierMixin, CreateUpdateMixin):
 
     uuid = Column(PGUUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    # sender_identifier = Column(String(255), nullable=True)
+    sender_identifier = Column(String(255), nullable=True)
     ip_address = Column(String(45), nullable=True)
     status = Column(Enum(OrderStatus), default=OrderStatus.PENDING, nullable=False)
-    # total_recipients = Column(Integer, default=0, nullable=False)
+    user_agent = Column(String(255), nullable=True)
     text_preview = Column(String(1000), nullable=True)
-
     content_hash = Column(String(64), nullable=True, index=True)
     is_flagged = Column(Boolean, default=False, nullable=False)
     flag_reason = Column(String(100), nullable=True)
@@ -381,13 +380,14 @@ class Message(Base, IdentifierMixin, CreateUpdateMixin):
 
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    sender_identifier = Column(String(255), nullable=True)
     channel_identifier_id = Column(Integer, ForeignKey("s_channel_identifiers.id", ondelete="RESTRICT"), nullable=False)
     recipient_value = Column(String(255), nullable=False)
     text = Column(Text, nullable=False)
     status = Column(Enum(MessageStatus), default=MessageStatus.PENDING, nullable=False)
     error_message = Column(Text, nullable=True)
     delivered_at = Column(DateTime, nullable=True)
-
+    repeat_counter=Column(Integer, default=0, nullable=False)
     sender = relationship("User", back_populates="messages")
     order = relationship("Order", back_populates="messages")
     channel_identifier = relationship("S_ChannelIdentifier", back_populates="messages")
