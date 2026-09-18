@@ -1,7 +1,7 @@
 import hashlib
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from app.crud.base import CRUDBase
 from app.models.models import (
     Contact,
@@ -13,12 +13,13 @@ from app.models.models import (
     PermissionProhibitionStatus,
     PermissionProhibitionType,
     S_Channel,
-    S_ChannelIdentifier,VerificationType
+    S_ChannelIdentifier, VerificationType
 )
-from app.schemas.schemas import MessageCreate, OrderCreate,QuickSendRequest,LoginApiResponse
+from app.schemas.schemas import MessageCreate, OrderCreate, QuickSendRequest, LoginApiResponse
 from app.services.channel import ChannelService
 from app.services.contact import ContactService
-from app.services.rate_limit import RateLimitService
+from app.config.config import settings
+from app.services.common.common import get_sent_sms_count_for_recent_period
 from app.core.redis.redis import *
 
 crud_order = CRUDBase[Order, OrderCreate, dict](Order)
@@ -28,7 +29,7 @@ crud_message = CRUDBase[Message, MessageCreate, dict](Message)
 class MessageService:
     def __init__(self, db: Session):
         self.db = db
-        self.rate_limit_service = RateLimitService(db)
+        # self.rate_limit_service = RateLimitService(db)
         self.channel_service = ChannelService(db)
         self.contact_service = ContactService(db)
 
@@ -44,7 +45,8 @@ class MessageService:
             .first()
         )
         if not identifier:
-            raise ValueError(f"Дефолтный идентификатор для канала '{channel_code}' не настроен")
+            raise ValueError(
+                f"Дефолтный идентификатор для канала '{channel_code}' не настроен")
         return identifier
 
     def _is_contact_blocked(self, contact_id: int) -> bool:
@@ -62,10 +64,11 @@ class MessageService:
         return rule is not None
 
     # антиспам TODO
-    def anti_spam(self,order:OrderCreate):
+    def anti_spam(self, order: OrderCreate):
         # Быстрая проверка: не рассылался ли этот же текст за последний час более 5 раз?
-        content_hash = hashlib.sha256(order.text_preview.encode("utf-8")).hexdigest()
-        
+        content_hash = hashlib.sha256(
+            order.text_preview.encode("utf-8")).hexdigest()
+
         recent_count = (
             self.db.query(Order)
             .filter(
@@ -76,10 +79,10 @@ class MessageService:
         )
 
         if recent_count >= 5:
-            order.content_hash=content_hash
+            order.content_hash = content_hash
             order.is_flagged = True
             order.flag_reason = "duplicate_content_hash_burst"
-    
+
     def send_bulk_email_phone(
         self,
         sender_phone: str,
@@ -91,10 +94,11 @@ class MessageService:
         # 1. Проверка лимитов отправки TODO
         # if not self.rate_limit_service.check_limit(sender_phone):
         #     raise ValueError("Превышен лимит отправок смс-сообщений в час")
-
+        counts = get_sent_sms_count_for_recent_period(
+            self.db, user_id=sender_user_id)
         # 2. Вычисление хеша контента для антиспама
         # content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
-
+        count_send_messages = counts["total_sms_sent"]
         # 3. Создание заказа (содержит только актуальные поля модели Order)
         order_in = OrderCreate(
             sender_identifier=sender_phone,
@@ -110,79 +114,90 @@ class MessageService:
         # 4. Формирование сообщений по получателям
         created_messages_count = 0
         for recipient in recipients:
-            raw_value = str(recipient.get("value", "")).strip()
-            ch_code = recipient.get("channel_type") or default_channel_code
+            for channel_identifier_name in ["phone", "email"]:
+                value = recipient[channel_identifier_name]
+                if value:
+                    channel_identifier = self._get_default_identifier(
+                        channel_identifier_name)
 
-            if not raw_value:
-                continue
+                    # Находим или регистрируем системный контакт
+                    contact = self.contact_service.get_or_create_contact(
+                        channel_identifier_id=channel_identifier.id,
+                        value=value,
+                    )
+                else:
+                    continue
 
-            identifier = self._get_default_identifier(ch_code)
-
-            # Находим или регистрируем системный контакт
-            contact = self.contact_service.get_or_create_contact(
-                channel_identifier_id=identifier.id,
-                value=raw_value,
-            )
-
-            # Проверяем глобальный запрет
-            if self._is_contact_blocked(contact.id):
-                # Фиксируем отмененное сообщение со статусом ошибки
+                # Проверяем глобальный запрет
+                if self._is_contact_blocked(contact.id):
+                    # Фиксируем отмененное сообщение со статусом ошибки
+                    msg_in = MessageCreate(
+                        order_id=order.id,
+                        user_id=sender_user_id,
+                        channel_identifier_id=channel_identifier.id,
+                        recipient_value=value,
+                        text=text,
+                        status=MessageStatus.FAILED,
+                        error_message="Получатель запретил рассылку на данный контакт",
+                    )
+                    crud_message.create(self.db, obj_in=msg_in)
+                    continue
+                if count_send_messages+created_messages_count >= settings.LIMIT_COUNT_SMS_FOR_LIMIT_PERIOD_HOURS:
+                    msg_in = MessageCreate(
+                        order_id=order.id,
+                        user_id=sender_user_id,
+                        channel_identifier_id=channel_identifier.id,
+                        recipient_value=value,
+                        text=text,
+                        status=MessageStatus.FAILED,
+                        error_message="Превышен лимит количества отправлемых смс",
+                    )
+                    crud_message.create(self.db, obj_in=msg_in)
+                    continue
+                # Создаем сообщение готовое к отправке
                 msg_in = MessageCreate(
                     order_id=order.id,
                     user_id=sender_user_id,
-                    channel_identifier_id=identifier.id,
-                    recipient_value=raw_value,
+                    channel_identifier_id=channel_identifier.id,
+                    recipient_value=value,
                     text=text,
-                    status=MessageStatus.FAILED,
-                    error_message="Получатель запретил рассылку на данный контакт",
+                    status=MessageStatus.PENDING,
                 )
                 crud_message.create(self.db, obj_in=msg_in)
-                continue
-
-            # Создаем сообщение готовое к отправке
-            msg_in = MessageCreate(
-                order_id=order.id,
-                user_id=sender_user_id,
-                channel_identifier_id=identifier.id,
-                recipient_value=raw_value,
-                text=text,
-                status=MessageStatus.PENDING,
-            )
-            crud_message.create(self.db, obj_in=msg_in)
-            created_messages_count += 1
+                created_messages_count += 1
 
         # 5. Завершение заказа и учет счетчиков
-        crud_order.update(self.db, db_obj=order, obj_in={"status": OrderStatus.COMPLETED})
-        self.rate_limit_service.increment(sender_phone)
+        crud_order.update(self.db, db_obj=order, obj_in={
+                          "status": OrderStatus.PENDING})
+        # self.rate_limit_service.increment(sender_phone)
 
         # Обновляем объект, чтобы подтянулись созданные связанные сообщения
         self.db.refresh(order)
         return order
-    
-    def send_phone_email(self,data: QuickSendRequest,client_ip:str,user_agent:str)->LoginApiResponse:
-        
+
+    def send_phone_email(self, data: QuickSendRequest, client_ip: str, user_agent: str) -> LoginApiResponse:
+
         from app.services.user import UserService
         from app.services.verification import VerificationService
         from app.services.user_document import UserDocumentService
-        
+
         verification_service = VerificationService(self.db)
         user_service = UserService(self.db)
         user_document_service = UserDocumentService(self.db)
-        
+
         key = "auth_login"
-        session_data=None
-        
+        session_data = None
+
         if not data.terms_accepted:
-            raise Exception("Не приняты Условия использования и/или Политика конфиденциальности" )
-        
+            raise Exception(
+                "Не приняты Условия использования и/или Политика конфиденциальности")
+
         if data.data_token and check_exists(key, data.data_token):
             session_data = read_value(key, data.data_token)
-            if not session_data["phone"]==data.phone:
+            if not session_data["phone"] == data.phone:
                 delete_value(key, data.data_token)
                 # raise Exception("Данные формы не совпадают с запрошенной сессией подтверждения. Запросите код заново.")
-            
-        
-        
+
         # 1. Поиск пользователя
         user = user_service.get_user_by_phone(data.phone)
         if not user:
@@ -195,7 +210,7 @@ class MessageService:
             user=user,
         )
         if not verified_code:
-            raise Exception("Неверный или просроченный код" )
+            raise Exception("Неверный или просроченный код")
 
         # 4. Фиксация согласия с документами через обновленный сервис
         user_document_service.confirm_user_documents(
@@ -221,5 +236,3 @@ class MessageService:
             status_code=0,
             data={"order_id": str(order.uuid)}
         )
-
-            

@@ -31,7 +31,9 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://:291297@192.168.1.222:6379/0"
 
     # --- Безопасность и токены ---
-    SECRET_KEY: str = "your-secret-key-here-change-in-production"
+    # python -c "import secrets; print(secrets.token_urlsafe(32))"
+    # или openssl rand -hex 32
+    SECRET_KEY: str = "sBppNnI0Cv09aFOIOrj3WowTrNfDDjbqArSvxu2sliI"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 дней
 
@@ -59,6 +61,13 @@ class Settings(BaseSettings):
     # "^[^@\s]+@[^@\s]+\.[^@\s]+$"
     EMAIL_VALIDATION_REGEX: str = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
+    #-----------Настройки для воркера---------------------------------
+    # Настройки Worker Service
+    MAX_MESSAGE_RETRIES: int = 3       # Максимальное количество попыток отправки
+    WORKER_BATCH_SIZE: int = 20        # Размер пачки сообщений на один захват
+    WORKER_POLL_INTERVAL: float = 1.0  # Пауза между проверками при пустой очереди (сек)
+    
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

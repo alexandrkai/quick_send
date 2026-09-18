@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import HTTPException
 from app.models.models import engine, Base
-from app.routes.api.v1 import auth, messages, permission_prohibition, users,admin,feedbacks
+from app.routes.api.v1 import auth, messages, permission_prohibition, users,admin,feedbacks,orders_ws
 from app.routes import routes
 
 # # Создаём таблицы (если ещё не созданы)
@@ -47,6 +47,7 @@ app.include_router(permission_prohibition.router, prefix="/api/v1")
 app.include_router(messages.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(feedbacks.router, prefix="/api/v1")
+app.include_router(orders_ws.router)
 # Подключение веб-роутера (страницы)
 app.include_router(routes.router)
 

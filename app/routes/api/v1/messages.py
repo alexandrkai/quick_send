@@ -20,7 +20,6 @@ def get_client_ip(request: Request) -> str:
         return forwarded.split(",")[0].strip()
     return request.client.host if request.client else "127.0.0.1"
 
-
 @router.post("/quick-send")
 def quick_send(
     data: QuickSendRequest,
@@ -94,3 +93,19 @@ def get_order_status(
             status_code=status.HTTP_403_FORBIDDEN, detail="Доступ запрещен")
 
     return messages
+
+
+@router.post("/count-send-sms",summary="Определяет количество отправленных смс за последний промежуток времени с учетом лимита")
+def count_send_sms(
+    phone: str,
+    db: Session = Depends(get_db),
+):
+    try:
+        user_service=UserService(db)
+        user=user_service.get_user_by_phone(phone)
+        from app.services.common.common import get_sent_sms_count_for_recent_period
+        return get_sent_sms_count_for_recent_period(db,user_id=user.id)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))

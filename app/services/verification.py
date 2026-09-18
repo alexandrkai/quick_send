@@ -78,32 +78,32 @@ class VerificationService:
         crud_verification_code.mark_used(self.db, code_obj=vc)
         return vc
 
-    def get_and_generate_code_for_phone(
-        self, phone: str, type: VerificationType, user: Optional[User] = None
-    ) -> dict:
-        if not user:
-            user = self.user_service.find_and_create_user(phone=phone)
+    # def get_and_generate_code_for_phone(
+    #     self, phone: str, type: VerificationType, user: Optional[User] = None
+    # ) -> dict:
+    #     if not user:
+    #         user = self.user_service.find_and_create_user(phone=phone)
 
-        vc = crud_verification_code.get_active_code(
-            self.db, user_id=user.id, type=type)
-        if not vc:
-            vc = self.generate_code(type=type, user=user)
-            return {"is_new": True, "vc": vc, "status": "ok"}
+    #     vc = crud_verification_code.get_active_code(
+    #         self.db, user_id=user.id, type=type)
+    #     if not vc:
+    #         vc = self.generate_code(type=type, user=user)
+    #         return {"is_new": True, "vc": vc, "status": "ok"}
 
-        return {"is_new": False, "vc": vc, "status": "ok"}
+    #     return {"is_new": False, "vc": vc, "status": "ok"}
 
-    def filter_active_code(
-        self,
-        *,
-        type: VerificationType,
-        user: Optional[User] = None,
-        contact: Optional[Contact] = None
-    ) -> Optional[VerificationCode]:
-        contact_id = contact.id if contact else None
-        user_id = user.id if user else None
-        return crud_verification_code.get_active_code(
-            self.db, contact_id=contact_id, user_id=user_id, type=type
-        )
+    # def filter_active_code(
+    #     self,
+    #     *,
+    #     type: VerificationType,
+    #     user: Optional[User] = None,
+    #     contact: Optional[Contact] = None
+    # ) -> Optional[VerificationCode]:
+    #     contact_id = contact.id if contact else None
+    #     user_id = user.id if user else None
+    #     return crud_verification_code.get_active_code(
+        #     self.db, contact_id=contact_id, user_id=user_id, type=type
+        # )
 
     def auth_request_sms(self, data: PhoneRequest,client_ip:str,user_agent:str) -> LoginApiResponse:
         key = "auth_login"

@@ -54,10 +54,10 @@ class ContactType(str, enum.Enum):
 
 
 class MessageStatus(str, enum.Enum):
-    PENDING = "pending"
-    SENT = "sent"
-    DELIVERED = "delivered"
-    FAILED = "failed"
+    PENDING = "PENDING"
+    SENT = "SENT"
+    DELIVERED = "DELIVERED"
+    FAILED = "FAILED"
 
 
 class PermissionProhibitionType(str, enum.Enum):
@@ -277,13 +277,22 @@ class User(Base, IdentifierMixin, CreateUpdateMixin, IsActiveMixin):
     password_hash = Column(String(255), nullable=True)
     role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
 
+    # --- Поля блокировки пользователя ---
+    is_blocked = Column(Boolean, default=False, nullable=False, index=True)
+    blocked_at = Column(DateTime, nullable=True)
+    blocked_reason = Column(String(255), nullable=True)
+
     persons = relationship("Person", back_populates="user", cascade="all, delete-orphan")
     groups = relationship("PersonGroup", back_populates="user", cascade="all, delete-orphan")
     messages = relationship("Message", back_populates="sender")
     orders = relationship("Order", back_populates="user")
     verification_codes = relationship("VerificationCode", back_populates="user")
     user_documents = relationship("UserDocument", back_populates="user")
-
+    message_templates = relationship("MessageTemplate", back_populates="user", cascade="all, delete-orphan")
+    
+    __table_args__ = (
+        Index("ix_users_auth_guard", "phone", "is_blocked", "is_active"),
+    )
 
 # Глобальная точка доставки (физический номер телефона или email адрес)
 class Contact(Base, IdentifierMixin, CreateUpdateMixin, IsActiveMixin):
@@ -397,6 +406,49 @@ class Message(Base, IdentifierMixin, CreateUpdateMixin):
         Index("ix_messages_status_processing", "status", "created_at"),
     )
 
+class MessageTemplate(Base, IdentifierMixin, CreateUpdateMixin, IsActiveMixin):
+    __tablename__ = "message_templates"
+
+    channel_identifier_id = Column(
+        Integer,
+        ForeignKey("s_channel_identifiers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+
+    name = Column(String(100), nullable=False)
+    title_template = Column(String(255), nullable=True)   # Заголовок / тема
+    body_template = Column(Text, nullable=False)          # Основной текст с переменными
+    footer_template = Column(Text, nullable=True)         # Подвал / ссылка на отписку
+
+    is_default = Column(Boolean, default=False, nullable=False)
+
+    channel_identifier = relationship("S_ChannelIdentifier")
+    user = relationship("User")
+
+    __table_args__ = (
+        # Только один дефолтный системный шаблон на конкретный channel_identifier
+        Index(
+            "uq_system_default_template_per_identifier",
+            "channel_identifier_id",
+            unique=True,
+            postgresql_where=text("user_id IS NULL AND is_default = true AND is_active = true"),
+        ),
+        # Только один дефолтный шаблон пользователя на данный channel_identifier
+        Index(
+            "uq_user_default_template_per_identifier",
+            "channel_identifier_id",
+            "user_id",
+            unique=True,
+            postgresql_where=text("user_id IS NOT NULL AND is_default = true AND is_active = true"),
+        ),
+    )
 
 class VerificationCode(Base, IdentifierMixin, CreatedMixin):
     __tablename__ = "verification_codes"

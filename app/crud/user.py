@@ -1,8 +1,8 @@
 from typing import Optional
 from sqlalchemy.orm import Session
-
+from datetime import datetime
 from app.crud.base import CRUDBase
-from app.models.models import User, UserRole
+from app.models.models import User, UserRole,Boolean
 from app.schemas import UserCreate, UserUpdate
 
 
@@ -42,4 +42,30 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return self.create(db, obj_in=user_in)
 
 
+    def block_user(self,db: Session, user: User, reason: str) -> User:
+        """Блокировка пользователя с фиксацией времени и причины."""
+        user.is_blocked = True
+        user.blocked_at = datetime.now()
+        user.blocked_reason = reason
+        db.commit()
+        db.refresh(user)
+        return user
+
+    def unblock_user(self,db: Session, user: User) -> User:
+        """Разблокировка пользователя и сброс метаданных блокировки."""
+        user.is_blocked = False
+        user.blocked_at = None
+        user.blocked_reason = None
+        db.commit()
+        db.refresh(user)
+        return user
+    
+    def __is_blocked(user:Optional[User]=None)->Optional[Boolean]:
+        if not user: return None
+        return user.is_blocked
+    
+    def is_blocked_phone(self,db:Session,phone)->Optional[Boolean]:
+        user=self.get_by_phone(db,phone=phone)
+        return self.__is_blocked(user)
+    
 crud_user = CRUDUser(User)

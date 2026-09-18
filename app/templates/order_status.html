@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Статус заказа {{ order_uuid }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-processing { background: #fef08a; color: #854d0e; }
+    .status-pending { background: #f1f5f9; color: #475569; }
+    .status-sent { background: #e0f2fe; color: #0369a1; }
+    .status-delivered { background: #dcfce7; color: #15803d; }
+    .status-failed { background: #fee2e2; color: #b91c1c; }
+    .progress-bar-bg { width: 100%; background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden; margin: 16px 0; }
+    .progress-bar-fill { height: 100%; background: #2563eb; width: 0%; transition: width 0.3s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="card mb-6 p-6 shadow-sm border rounded-lg bg-white">
+        <h2 class="text-xl font-bold mb-2">Заказ: <span id="order-uuid">{{ order_uuid }}</span></h2>
+        <p class="mb-1">Статус: <span id="order-status" class="badge status-pending">-</span></p>
+        <p class="mb-3"><strong>Текст:</strong> <span id="order-text">-</span></p>
+
+        <div class="progress-bar-bg">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+        <p id="stats-summary" class="text-sm text-gray-600">Ожидание данных...</p>
+    </div>
+
+    <div class="card p-6 shadow-sm border rounded-lg bg-white">
+        <h3 class="text-lg font-semibold mb-4">Сообщения</h3>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b">
+                    <th class="p-2">ID</th>
+                    <th class="p-2">Получатель</th>
+                    <th class="p-2">Статус</th>
+                    <th class="p-2">Ошибка</th>
+                </tr>
+            </thead>
+            <tbody id="messages-table-body"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const orderUuid = "{{ order_uuid }}";
+
+    if (!orderUuid) {
+        alert("UUID заказа не определен");
+    } else {
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const ws = new WebSocket(`${protocol}//${window.location.host}/ws/orders/${orderUuid}`);
+
+        let isCompleted = false;
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "SNAPSHOT") {
+                document.getElementById("order-uuid").innerText = data.order.uuid;
+                document.getElementById("order-text").innerText = data.order.text_preview || "";
+                
+                updateOrderStatus(data.order.status);
+                updateProgress(data.stats);
+                renderMessages(data.messages);
+
+                if (data.stats.pending === 0 && data.stats.total > 0) {
+                    isCompleted = true;
+                }
+            }
+        };
+
+        ws.onclose = () => {
+            if (!isCompleted) {
+                console.log("Соединение разорвано. Повтор через 3 сек...");
+                setTimeout(() => location.reload(), 3000);
+            }
+        };
+    }
+
+    function updateOrderStatus(status) {
+        const el = document.getElementById("order-status");
+        el.innerText = status;
+        el.className = `badge status-${status.toLowerCase()}`;
+    }
+
+    function updateProgress(stats) {
+        document.getElementById("progress-fill").style.width = `${stats.progress_percent}%`;
+        document.getElementById("stats-summary").innerText = 
+            `Всего: ${stats.total} | Доставлено: ${stats.delivered} | Ошибок: ${stats.failed} | В обработке: ${stats.pending}`;
+    }
+
+    function renderMessages(messages) {
+        const tbody = document.getElementById("messages-table-body");
+        tbody.innerHTML = messages.map(m => `
+            <tr id="msg-row-${m.id}" class="border-b">
+                <td class="p-2">${m.id}</td>
+                <td class="p-2">${m.recipient}</td>
+                <td class="p-2"><span class="badge status-${m.status.toLowerCase()}">${m.status}</span></td>
+                <td class="p-2 text-red-600">${m.error || ""}</td>
+            </tr>
+        `).join('');
+    }
+</script>
+{% endblock %}

@@ -42,6 +42,9 @@ class UserService:
         user=self.get_user_by_phone(phone)
         if not user: 
             user=crud_user.create_with_phone(self.db,phone=phone)
+        else:
+            if user.is_blocked:
+                raise Exception("Пользователь с таким телефоном заблокирован!")
         return user
     
     def create_token(self,phone,user=None):

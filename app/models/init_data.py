@@ -1,5 +1,3 @@
-# app/models/init_data.py
-
 import json
 import logging
 import os
@@ -11,14 +9,36 @@ from app.config.config import settings
 from app.crud.channel import crud_channel
 from app.crud.channel_identifier import crud_channel_identifier
 from app.crud.document import crud_document
-from app.models.models import Base, UserDocumentType, SessionLocal, engine
+from app.models.models import (
+    Base,
+    MessageTemplate,
+    SessionLocal,
+    UserDocumentType,
+    engine,
+)
 from app.schemas import ChannelCreate, ChannelIdentifierCreate, DocumentCreate
 
 logger = logging.getLogger(__name__)
 
+# Конфигурация дефолтных системных шаблонов по коду канала
+DEFAULT_SYSTEM_TEMPLATES = {
+    "phone": {
+        "name": "Системный SMS шаблон по умолчанию",
+        "title_template": "От {author_phone}: ",
+        "body_template": "{text}",
+        "footer_template": "\nОтписаться: {opt_out_url}",
+    },
+    "email": {
+        "name": "Системный Email шаблон по умолчанию",
+        "title_template": "Сообщение от {author_name}",
+        "body_template": "{text}",
+        "footer_template": "\n---\nЕсли вы не хотите получать рассылку: {opt_out_url}",
+    },
+}
+
 
 def __init_channels_and_channel_identifiers() -> None:
-    """Инициализация каналов с полями идентификаторов по умолчанию."""
+    """Инициализация каналов, их полей идентификаторов и системных шаблонов по умолчанию."""
     path_file = os.path.join(settings.PATH_DATA_DIR, "init", "s_channel.json")
     if not os.path.exists(path_file):
         logger.warning(f"Файл {path_file} не найден.")
@@ -31,7 +51,6 @@ def __init_channels_and_channel_identifiers() -> None:
         try:
             for item in data:
                 code = item.get("code")
-                # Учитываем поле 'name' или fallback на 'description'
                 name = item.get("name") or item.get("description", code)
 
                 channel = crud_channel.create(
@@ -39,19 +58,37 @@ def __init_channels_and_channel_identifiers() -> None:
                     obj_in=ChannelCreate(code=code, description=name),
                 )
 
-                for identifier in item.get("identifiers", []):
-                    crud_channel_identifier.create(
+                for identifier_data in item.get("identifiers", []):
+                    identifier = crud_channel_identifier.create(
                         db,
                         obj_in=ChannelIdentifierCreate(
                             channel_id=channel.id,
-                            name=identifier["name"],
-                            validation_regex=identifier.get("validation_regex"),
-                            is_default=True
+                            name=identifier_data["name"],
+                            validation_regex=identifier_data.get("validation_regex"),
+                            is_default=True,
                         ),
                     )
-            logger.info("Справочники каналов и идентификаторов успешно инициализированы.")
+
+                    # Создаем системный шаблон по умолчанию для данного канала
+                    tpl_config = DEFAULT_SYSTEM_TEMPLATES.get(code)
+                    if tpl_config:
+                        template = MessageTemplate(
+                            channel_identifier_id=identifier.id,
+                            user_id=None,  # Системный дефолт
+                            name=tpl_config["name"],
+                            title_template=tpl_config["title_template"],
+                            body_template=tpl_config["body_template"],
+                            footer_template=tpl_config["footer_template"],
+                            is_default=True,
+                            is_active=True,
+                        )
+                        db.add(template)
+
+            db.commit()
+            logger.info("Справочники каналов, идентификаторов и системные шаблоны инициализированы.")
         except Exception as e:
-            logger.error(f"Ошибка при вставке каналов: {e}")
+            db.rollback()
+            logger.error(f"Ошибка при вставке каналов и шаблонов: {e}")
             raise
 
 
@@ -116,13 +153,7 @@ def init_db() -> dict:
 
         admin_engine.dispose()
 
-        # 2. Удаление и создание таблиц
-        # Base.metadata.drop_all(bind=engine)
-        # logger.info("Все таблицы удалены")
-
-        # Base.metadata.create_all(bind=engine)
-        # logger.info("Таблицы успешно созданы")
-        # 2. Полный сброс схемы с каскадным удалением всех зависимостей и старых таблиц
+        # 2. Полный сброс схемы public
         with engine.connect() as conn:
             with conn.begin():
                 conn.execute(text("DROP SCHEMA public CASCADE;"))
@@ -134,7 +165,7 @@ def init_db() -> dict:
         Base.metadata.create_all(bind=engine)
         logger.info("Таблицы успешно созданы")
 
-        # 3. Наполнение начальными данными
+        # 4. Наполнение начальными данными
         __init_channels_and_channel_identifiers()
         __init_documents()
 

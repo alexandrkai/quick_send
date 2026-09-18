@@ -18,16 +18,9 @@ from app.models import (
     get_db,
     UserDocumentType, VerificationType
 )
+from app.services.common.common import *
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и верификация"])
-
-
-def get_client_ip(request: Request) -> str:
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "127.0.0.1"
-
 
 @router.post("/request-sms")
 def request_sms(data: PhoneRequest,
@@ -36,7 +29,7 @@ def request_sms(data: PhoneRequest,
     """Запрос кода для входа по СМС."""
     try:
         client_ip = get_client_ip(request)
-        user_agent = request.headers.get("User-Agent")
+        user_agent = get_user_agent(request)
         verification_service = VerificationService(db)
         return verification_service.auth_request_sms(data, client_ip, user_agent)
     except HTTPException:

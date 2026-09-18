@@ -168,3 +168,14 @@ async def dynamic_redirects(path: str):
     if path in REDIRECT_MAP:
         return RedirectResponse(url=f"/{REDIRECT_MAP[path]}")
     return HTMLResponse(content="Маршрут не найден", status_code=404)
+
+@router.get("/orders/{order_uuid}/status", response_class=HTMLResponse)
+def render_order_status_page(request: Request, order_uuid: str):
+    return templates.TemplateResponse(
+        request,
+        name="order_status.html",
+        context={
+            "request": request,
+            "order_uuid": order_uuid
+        }
+    )
